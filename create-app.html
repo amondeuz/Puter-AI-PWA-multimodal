@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <pre id="log"></pre>
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+      const log = (msg) => {
+        const pre = document.getElementById('log');
+        pre.textContent += msg + "\n";
+        console.log(msg);
+      };
+
+      (async () => {
+        try {
+          log("Starting app creation...");
+
+          // 1) Make sure you are signed in to Puter
+          log("Opening Puter sign-in (if needed)...");
+          const authResult = await puter.auth.signIn();
+          log("Signed in as: " + (authResult?.user?.username || JSON.stringify(authResult)));
+
+          // 2) URL of your GitHub Pages app
+          const indexURL = "https://amondeuz.github.io/Puter-AI-PWA-multimodal/";
+
+          // 3) Create the app entry in Puter OS
+          const app = await puter.apps.create({
+            name: "amon-multimodal-ai",
+            indexURL,
+            title: "Amon Multimodal AI",
+            description: "Multimodal Puter AI client: chat, images, OCR, TTS, STT, and video.",
+            maximizeOnStart: true
+          });
+
+          log('Success. Created app "' + app.name + '". You can now find it in your Apps.');
+
+        } catch (e) {
+          console.error(e);
+          log("ERROR: " + (e && e.message ? e.message : e));
+        }
+      })();
+    </script>
+  </body>
+</html>

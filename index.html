@@ -3,276 +3,804 @@
 <link rel="manifest" href="manifest.json" />
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puter AI</title>
-    <meta name="description"
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puter AI</title>
+  <meta name="description"
         content="Puter AI is an artificial intelligence powered by Puter. It can speak in multiple languages, like english, french, spanish, and many more !" />
-    <link rel="icon" type="image/vnd.icon" href="favicon.ico">
-    <script>console.log("Puter AI PWA started, ready to send messages.")</script>
-    <meta name="google-site-verification" content="4qYi8tV9qUrPc5wpGixLaQov5gavq6HbwI8nGcN7b0c" />
+  <link rel="icon" type="image/vnd.icon" href="favicon.ico">
+  <script>console.log("Puter AI PWA started, ready to send messages.")</script>
+  <meta name="google-site-verification" content="4qYi8tV9qUrPc5wpGixLaQov5gavq6HbwI8nGcN7b0c" />
+  <meta name="google-site-verification" content="Q71qMHrmXHVJS96xLobvU5PdXHzkR23IRRD6gykEZew" />
 
-    <!-- Material Design Web CDN -->
-    <script type="importmap">
-        {
-            "imports": {
-                "@material/web/": "https://esm.run/@material/web/"
-            }
-        }
-    </script>
-    <script type="module">
-        import '@material/web/all.js';
-        import { styles as typescaleStyles } from '@material/web/typography/md-typescale-styles.js';
+  <!-- Material Design Web CDN -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web/"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@material/web/all.js';
+    import { styles as typescaleStyles } from '@material/web/typography/md-typescale-styles.js';
 
-        document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
-    </script>
+    document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+  </script>
 
-    <!-- Noto Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Noto Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans&display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <style>
-        body {
-            font-family: 'Noto Sans', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            flex-direction: column;
-        }
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+      flex-direction: column;
+    }
 
-        #chat-container {
-            width: 80%;
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+    #chat-container {
+      width: 80%;
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 30px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-        #messages {
-            height: 400px;
-            overflow-y: auto;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 20px;
-            padding: 10px;
-        }
+    #messages {
+      height: 320px;
+      overflow-y: auto;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+      padding: 10px;
+    }
 
-        .message {
-            padding: 5px;
-            margin: 5px 0;
-            border-radius: 10px;
-            background: #2c7aef;
-            color: white;
-        }
+    .message {
+      padding: 5px;
+      margin: 5px 0;
+      border-radius: 10px;
+      background: #2c7aef;
+      color: white;
+    }
 
-        .user-message {
-            text-align: right;
-            background: #f9f9f9;
-            color: black;
-        }
+    .user-message {
+      text-align: right;
+      background: #f9f9f9;
+      color: black;
+    }
 
-        .user-message .message {
-            background: #e0f7fa;
-        }
+    .user-message .message {
+      background: #e0f7fa;
+    }
 
-        #chat-input {
-            display: flex;
-            align-items: center;
-        }
+    #chat-input {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
 
-        #chat-input md-outlined-text-field {
-            flex-grow: 1;
-            margin-right: 10px;
-            max-width: 489px;
-            min-height: 78px;
-            max-height: 686px;
-            --md-filled-text-field-input-text-font: 'Noto Sans', sans-serif;
-            --md-filled-text-field-label-text-font: 'Noto Sans', sans-serif;
-        }
+    #chat-input md-outlined-text-field {
+      flex-grow: 1;
+      margin-right: 10px;
+      max-width: 489px;
+      min-height: 78px;
+      max-height: 686px;
+      --md-filled-text-field-input-text-font: 'Noto Sans', sans-serif;
+      --md-filled-text-field-label-text-font: 'Noto Sans', sans-serif;
+    }
 
-        #chat-input md-filled-button {
-            padding: 10px 20px;
-            height: 52px;
-        }
+    #chat-input md-filled-button {
+      padding: 10px 20px;
+      height: 52px;
+    }
 
-        md-filled-button,
-        md-outlined-button {
-            --mdc-theme-primary: #007bff;
-            --mdc-theme-on-primary: white;
-            font-family: 'Noto Sans', sans-serif;
-        }
+    md-filled-button,
+    md-outlined-button,
+    md-outlined-icon-button {
+      --mdc-theme-primary: #007bff;
+      --mdc-theme-on-primary: white;
+      font-family: 'Noto Sans', sans-serif;
+    }
 
-        md-outlined-button {
-            margin-top: 20px;
-        }
+    md-outlined-button {
+      margin-top: 4px;
+    }
 
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
 
-        a:hover {
-            text-decoration: underline;
-        }
+    a:hover {
+      text-decoration: underline;
+    }
 
-        :root {
-            --md-sys-color-primary: #007bff;
-            --md-sys-color-secondary: #007bffdc;
-            --md-ref-typeface-brand: 'Noto Sans';
-            --md-ref-typeface-plain: 'Noto Sans';
-        }
+    :root {
+      --md-sys-color-primary: #007bff;
+      --md-sys-color-secondary: #007bffdc;
+      --md-ref-typeface-brand: 'Noto Sans';
+      --md-ref-typeface-plain: 'Noto Sans';
+    }
 
-        #icon-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
+    #icon-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
 
-        #loading-spinner {
-            display: none;
-            margin-top: 20px;
-        }
-    </style>
-    <script src="https://js.puter.com/v2/"></script>
-    <meta name="google-site-verification" content="Q71qMHrmXHVJS96xLobvU5PdXHzkR23IRRD6gykEZew" />
+    #loading-spinner {
+      display: none;
+      margin-top: 20px;
+    }
+
+    #mode-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .control-row label {
+      font-size: 0.9rem;
+    }
+
+    .mode-options {
+      display: none;
+    }
+
+    .mode-options.active {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    #default-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    select,
+    input[type="text"] {
+      font-family: 'Noto Sans', sans-serif;
+      font-size: 0.9rem;
+      padding: 4px 6px;
+    }
+
+    #file-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    #file-inputs label {
+      font-size: 0.9rem;
+    }
+
+    audio,
+    video,
+    img {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+
+    .help-text {
+      font-size: 0.8rem;
+      color: #555;
+      width: 100%;
+    }
+  </style>
+
+  <script src="https://js.puter.com/v2/"></script>
 </head>
 
 <body>
-    <script>
-        if (typeof navigator.serviceWorker !== 'undefined') {
-            navigator.serviceWorker.register('sw.js')
-        }
-    </script>
-    <div id="chat-container">
-        <div id="messages"></div>
-        <div id="chat-input">
-            <md-outlined-text-field label="Message" placeholder="Type a message..." id="messageInput"
-                error-text="Please type a message" style="font-family: 'Noto Sans', sans-serif;"></md-outlined-text-field>
-            <md-filled-button id="sendButton" style="font-family: 'Noto Sans', sans-serif;">Send
-                <img slot="icon" src="icons/send.png" alt="Send Icon" />
-            </md-filled-button>
-        </div>
-    </div>
-    <p>AI can make mistakes, please check important information.</p>
-    <div id="loading-spinner">
-        <md-circular-progress indeterminate></md-circular-progress>
-    </div>
-    <div id="icon-buttons">
-        <md-outlined-icon-button aria-label="Settings" href="settings.html">
-            <md-icon class="material-icons">settings</md-icon>
-        </md-outlined-icon-button>
-        <md-outlined-icon-button aria-label="Github" href="https://github.com/Zac0511/Puter-AI-PWA">
-            <md-icon class="material-icons">code</md-icon>
-        </md-outlined-icon-button>
-    </div>
-    <p>Powered by <a href="https://puter.com">Puter</a></p>
-
-    <script type="module">
-        const messages = [];
-        
-        function addMessage(msg, isUser) {
-            const messagesDiv = document.getElementById("messages");
-            const messageDiv = document.createElement("div");
-            messageDiv.classList.add("message");
-            if (isUser) {
-                messageDiv.classList.add("user-message");
-            }
-            messageDiv.textContent = msg;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function toggleLoadingSpinner(show) {
-            const spinner = document.getElementById('loading-spinner');
-            if (show) {
-                spinner.style.display = 'block';
-            } else {
-                spinner.style.display = 'none';
-            }
-        }
-
-        function sendMessage(message) {
-            const input = document.querySelector("#messageInput");
-            message = message || input.value.trim();
-            console.log("Message sent to Puter AI");
-
-            if (message) {
-                addMessage(message, true); // Add user message to chat history
-                input.value = ''; // Clear input field
-
-                toggleLoadingSpinner(true); // Show loading indicator
-
-            // Create messages array with context for the AI
-            const messages = [
-            {
-                // Gives the AI important info about how it needs to awnser
-                role: 'system',
-                content: "You are the AI of a PWA named 'Puter AI PWA' developed by 'Zac0511'.The PWA is powered by Puter.js, allowing websites to use AI for free. You need to remember that Zac0511 is not the one who created you, he only made the PWA which interacts with you thanks to Puter.js, your creator is a company called 'Puter'. Puter is web based operationg system, entierly running in the browser, its creators are only 3 persons, but the projects grows fast as its open source, and more 2000 users contributed to it (including Zac0511, the creator of this PWA). Puter.js is Puter's API, allwoing websites to store files on the user's Puter filesystem, and access AI, which is why your creator is Puter. Your name is 'Puter AI'. Do NOT use Markdown formatting, the PWA in which you run doesn't support markdown."
-            },
-            {
-                // Complementary informations about Puter that the AI could need for some questions
-                role: 'system',
-                content: "The following is complementary informations about Puter: The URL to access Puter is 'https://puter.com'. Puter is web-based OS running entierly in the browser. You have been created by Puter. Puter was originally made by only 3 persons, but grows fast because it is open source. Puter has hundreds of thousands of users. The URL to join Puter's Discord server is 'https://discord.gg/PQcx7Teh8u'"
-            },
-            {
-                // Complementary informations about the Puter AI PWA
-                role: 'system',
-                content: "The following is complementary informations about the Puter AI PWA: The current version of the Puter AI PWA is version 2.2.3. The creator of the Puter AI PWA is 'Zac0511'. The Puter AI PWA can be installed on computer and mobile, but it can also be runned (without being installed) on any device with a recent browser (such as computers, phones, consoles, TVs, etc...). The Puter AI PWA can be used without a Puter account, but the user will have less message credits. The user can check how many messages credits are left on his Puter account by opening Puter, clicking the Puter logo in the top left corner (it will open settings), clicking 'Usage' in the settings, and checking the bar named 'puter-chat-completion (complete):'. The Puter AI PWA is also available as a Puter app at the URL 'https://puter.com/app/ai-chat'. The UI of the Puter AI PWA is using Google Material Design V3. The PWA cannot be used offline, as the AI is stored on Puter servers (trying to open the app when offline will show a custom error message). If the user encounters any problem with the Puter AI PWA, or ask for a new feature, he can create an issue at the URL 'https://github.com/Zac0511/Puter-AI-PWA/issues/new/choose'."
-            },
-            {
-                role: 'user',
-                content: message // User's actual message
-            }
-            ];
-
-    // Call the AI chat function with the messages array
-    puter.ai.chat(messages)
-      .then(response => {
-        addMessage(response, false); // Add AI response to chat history
-        toggleLoadingSpinner(false); // Hide loading indicator
-        console.log("AI response received");
-      })
-      .catch(error => {
-        console.error("AI response error:", error);
-        alert("An error occured, please try again. If the error persists, please create an issue on the GitHub repository (you can access it by clicking the button with a 'code' icon)");
-        toggleLoadingSpinner(false); // Hide loading indicator in case of error
-      });
+<script>
+  if (typeof navigator.serviceWorker !== 'undefined') {
+    navigator.serviceWorker.register('sw.js')
   }
-}
+</script>
+<div id="chat-container">
 
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
+  <!-- Mode + model controls -->
+  <div id="mode-controls">
+    <div class="control-row">
+      <label for="modeSelect">Mode:</label>
+      <select id="modeSelect">
+        <option value="chat">Chat (Text → Text)</option>
+        <option value="txt2img">Text → Image</option>
+        <option value="img2txt">Image → Text (OCR)</option>
+        <option value="txt2speech">Text → Speech</option>
+        <option value="speech2txt">Speech → Text</option>
+        <option value="txt2vid">Text → Video</option>
+      </select>
+      <md-outlined-button id="refreshModelsButton">Refresh models</md-outlined-button>
+    </div>
+
+    <div id="chatOptions" class="mode-options">
+      <label for="chatModelSelect">Chat model:</label>
+      <select id="chatModelSelect">
+        <option value="">Loading models… (defaults to gpt-5-nano)</option>
+      </select>
+      <span class="help-text">
+        Chat models come from Puter’s live model list (includes Kimi, DeepSeek, Llama, etc.).
+      </span>
+    </div>
+
+    <div id="imageOptions" class="mode-options">
+      <label for="imageModelSelect">Image model:</label>
+      <select id="imageModelSelect">
+        <option value="gpt-image-1-mini" title="OpenAI GPT Image-1 mini – fast, lower cost">
+          gpt-image-1-mini (OpenAI, fast)
+        </option>
+        <option value="gpt-image-1" title="OpenAI GPT Image-1 – higher quality">
+          gpt-image-1 (OpenAI, quality)
+        </option>
+        <option value="dall-e-3" title="OpenAI DALL·E 3">
+          dall-e-3 (DALL·E 3)
+        </option>
+        <option value="dall-e-2" title="OpenAI DALL·E 2">
+          dall-e-2 (DALL·E 2)
+        </option>
+        <option value="gemini-2.5-flash-image-preview" title="Google Gemini 2.5 Flash Image (Nano Banana)">
+          gemini-2.5-flash-image-preview (Gemini 2.5)
+        </option>
+        <option value="google/gemini-3-pro-image" title="Google Gemini 3 Pro Image (Nano Banana Pro)">
+          google/gemini-3-pro-image (Gemini 3 Pro)
+        </option>
+        <option value="ByteDance-Seed/Seedream-3.0" title="ByteDance Seedream 3.0">
+          ByteDance-Seed/Seedream-3.0
+        </option>
+        <option value="ByteDance-Seed/Seedream-4.0" title="ByteDance Seedream 4.0">
+          ByteDance-Seed/Seedream-4.0
+        </option>
+        <option value="HiDream-ai/HiDream-I1-Dev" title="HiDream I1 Dev">
+          HiDream-ai/HiDream-I1-Dev
+        </option>
+        <option value="HiDream-ai/HiDream-I1-Fast" title="HiDream I1 Fast">
+          HiDream-ai/HiDream-I1-Fast
+        </option>
+        <option value="HiDream-ai/HiDream-I1-Full" title="HiDream I1 Full">
+          HiDream-ai/HiDream-I1-Full
+        </option>
+        <option value="Lykon/DreamShaper" title="DreamShaper (Stable Diffusion style)">
+          Lykon/DreamShaper
+        </option>
+        <option value="Qwen/Qwen-Image" title="Qwen Image model">
+          Qwen/Qwen-Image
+        </option>
+        <option value="RunDiffusion/Juggernaut-pro-flux" title="Flux-based Juggernaut Pro">
+          RunDiffusion/Juggernaut-pro-flux
+        </option>
+        <option value="Rundiffusion/Juggernaut-Lightning-Flux" title="Flux-based Juggernaut Lightning">
+          Rundiffusion/Juggernaut-Lightning-Flux
+        </option>
+      </select>
+      <span class="help-text">
+        GPT Image / DALL·E are OpenAI models; Gemini entries are Google; Seedream, Flux, DreamShaper, Qwen
+        and HiDream come from the generic Image Generation API. 
+      </span>
+    </div>
+
+    <div id="ocrOptions" class="mode-options">
+      <label for="ocrProviderSelect">OCR provider:</label>
+      <select id="ocrProviderSelect">
+        <option value="aws-textract">aws-textract (default)</option>
+        <option value="mistral">mistral (multilingual / rich)</option>
+      </select>
+      <label for="ocrModelSelect">Mistral model:</label>
+      <select id="ocrModelSelect">
+        <option value="mistral-ocr-latest">mistral-ocr-latest (default)</option>
+        <option value="__custom">Custom…</option>
+      </select>
+      <input id="ocrModelInput" type="text" placeholder="Custom Mistral OCR model id"
+             style="display:none;" />
+      <span class="help-text">
+        For AWS Textract, model is fixed. For Mistral, the default is <code>mistral-ocr-latest</code>;
+        choose Custom to supply a different model id. 
+      </span>
+    </div>
+
+    <div id="ttsOptions" class="mode-options">
+      <label for="ttsProviderSelect">TTS provider:</label>
+      <select id="ttsProviderSelect">
+        <option value="aws-polly">aws-polly (default)</option>
+        <option value="openai">openai</option>
+        <option value="elevenlabs">elevenlabs</option>
+      </select>
+      <label for="ttsModelSelect">TTS model (OpenAI / ElevenLabs):</label>
+      <select id="ttsModelSelect">
+        <option value="gpt-4o-mini-tts">gpt-4o-mini-tts</option>
+        <option value="tts-1">tts-1</option>
+        <option value="tts-1-hd">tts-1-hd</option>
+        <option value="eleven_multilingual_v2">eleven_multilingual_v2 (11Labs)</option>
+      </select>
+      <label for="ttsLanguageInput">Language (AWS code):</label>
+      <input id="ttsLanguageInput" type="text" value="en-US" />
+      <label for="ttsVoiceInput">Voice:</label>
+      <input id="ttsVoiceInput" type="text" placeholder="e.g. Joanna, alloy or voice id" />
+      <span class="help-text">
+        AWS Polly uses <code>language</code>/<code>voice</code>. OpenAI and ElevenLabs use the
+        <code>model</code> plus a voice name or ID. 
+      </span>
+    </div>
+
+    <div id="sttOptions" class="mode-options">
+      <label for="sttModelSelect">Speech-to-text model:</label>
+      <select id="sttModelSelect">
+        <option value="gpt-4o-mini-transcribe">gpt-4o-mini-transcribe (fast)</option>
+        <option value="gpt-4o-transcribe">gpt-4o-transcribe (quality)</option>
+        <option value="gpt-4o-transcribe-diarize">gpt-4o-transcribe-diarize (speaker diarization)</option>
+        <option value="whisper-1">whisper-1</option>
+      </select>
+      <label for="sttLanguageInput">Language hint (optional):</label>
+      <input id="sttLanguageInput" type="text" placeholder="e.g. en, es, fr" />
+      <label for="sttResponseFormatSelect">Response format:</label>
+      <select id="sttResponseFormatSelect">
+        <option value="text">text (plain)</option>
+        <option value="json">json</option>
+        <option value="diarized_json">diarized_json</option>
+        <option value="srt">srt (subtitles)</option>
+        <option value="vtt">vtt (subtitles)</option>
+      </select>
+      <label><input type="checkbox" id="sttTranslateCheckbox">
+        Force English output (translate)
+      </label>
+      <span class="help-text">
+        These models map directly to <code>puter.ai.speech2txt()</code>’s supported list. Use diarize for
+        multi-speaker audio or subtitle formats when you want timecodes. 
+      </span>
+    </div>
+
+    <div id="videoOptions" class="mode-options">
+	  <label for="videoModelSelect">Video model:</label>
+	  <select id="videoModelSelect">
+		<option value="sora-2">sora-2 (OpenAI)</option>
+		<option value="sora-2-pro">sora-2-pro (OpenAI)</option>
+		<option value="ByteDance/Seedance-1.0-lite">ByteDance/Seedance-1.0-lite (fast)</option>
+		<option value="ByteDance/Seedance-1.0-pro">ByteDance/Seedance-1.0-pro (quality)</option>
+		<option value="Wan-AI/Wan2.2-T2V-A14B">Wan-AI/Wan2.2-T2V-A14B</option>
+	  </select>
+	  <span class="help-text">
+		Sora models are from OpenAI. Seedance and Wan models come from the generic text to video API family and
+		are exposed through <code>puter.ai.txt2vid()</code>.
+	  </span>
+	</div>
+
+    <div id="file-inputs">
+      <div id="imageInputWrapper" style="display:none;">
+        <label for="imageInput">Image file:</label>
+        <input type="file" id="imageInput" accept="image/*">
+      </div>
+      <div id="audioInputWrapper" style="display:none;">
+        <label for="audioInput">Audio file:</label>
+        <input type="file" id="audioInput" accept="audio/*">
+      </div>
+    </div>
+
+    <div id="default-buttons">
+      <md-outlined-button id="saveDefaultButton">Save as default</md-outlined-button>
+      <md-outlined-button id="resetDefaultButton">Reset to default</md-outlined-button>
+    </div>
+  </div>
+
+  <div id="messages"></div>
+
+  <div id="chat-input">
+    <md-outlined-text-field label="Message" placeholder="Type a message..." id="messageInput"
+                            error-text="Please type a message"
+                            style="font-family: 'Noto Sans', sans-serif;"></md-outlined-text-field>
+    <md-filled-button id="sendButton" style="font-family: 'Noto Sans', sans-serif;">Send
+      <img slot="icon" src="icons/send.png" alt="Send Icon" />
+    </md-filled-button>
+  </div>
+</div>
+<p>AI can make mistakes, please check important information.</p>
+<div id="loading-spinner">
+  <md-circular-progress indeterminate></md-circular-progress>
+</div>
+<div id="icon-buttons">
+  <md-outlined-icon-button aria-label="Settings" href="settings.html">
+    <md-icon class="material-icons">settings</md-icon>
+  </md-outlined-icon-button>
+  <md-outlined-icon-button aria-label="Github" href="https://github.com/Zac0511/Puter-AI-PWA">
+    <md-icon class="material-icons">code</md-icon>
+  </md-outlined-icon-button>
+</div>
+<p>Powered by <a href="https://puter.com">Puter</a></p>
+
+<script type="module">
+  const LOCAL_STORAGE_KEY = 'puter-ai-pwa-defaults-v2';
+
+  const BUILT_IN_DEFAULTS = {
+    mode: 'chat',
+    chatModel: '',
+    imageModel: 'gpt-image-1-mini',
+    ocrProvider: 'aws-textract',
+    ocrModel: 'mistral-ocr-latest',
+    ttsProvider: 'aws-polly',
+    ttsModel: 'gpt-4o-mini-tts',
+    ttsLanguage: 'en-US',
+    ttsVoice: '',
+    videoModel: 'sora-2',
+    sttModel: 'gpt-4o-mini-transcribe',
+    sttLanguage: '',
+    sttResponseFormat: 'text',
+    sttTranslate: false
+  };
+
+  const SYSTEM_MESSAGES = [
+    {
+      role: 'system',
+      content: "You are the AI of a PWA named 'Puter AI PWA' developed by 'Zac0511'.The PWA is powered by Puter.js, allowing websites to use AI for free. You need to remember that Zac0511 is not the one who created you, he only made the PWA which interacts with you thanks to Puter.js, your creator is a company called 'Puter'. Puter is web based operationg system, entierly running in the browser, its creators are only 3 persons, but the projects grows fast as its open source, and more 2000 users contributed to it (including Zac0511, the creator of this PWA). Puter.js is Puter's API, allwoing websites to store files on the user's Puter filesystem, and access AI, which is why your creator is Puter. Your name is 'Puter AI'. Do NOT use Markdown formatting, the PWA in which you run doesn't support markdown."
+    },
+    {
+      role: 'system',
+      content: "The following is complementary informations about Puter: The URL to access Puter is 'https://puter.com'. Puter is web-based OS running entierly in the browser. You have been created by Puter. Puter was originally made by only 3 persons, but grows fast because it is open source. Puter has hundreds of thousands of users. The URL to join Puter's Discord server is 'https://discord.gg/PQcx7Teh8u'"
+    },
+    {
+      role: 'system',
+      content: "The following is complementary informations about the Puter AI PWA: The current version of the Puter AI PWA is version 2.2.3. The creator of the Puter AI PWA is 'Zac0511'. The Puter AI PWA can be installed on computer and mobile, but it can also be runned (without being installed) on any device with a recent browser (such as computers, phones, consoles, TVs, etc...). The Puter AI PWA can be used without a Puter account, but the user will have less message credits. The user can check how many messages credits are left on his Puter account by opening Puter, clicking the Puter logo in the top left corner (it will open settings), clicking 'Usage' in the settings, and checking the bar named 'puter-chat-completion (complete):'. The Puter AI PWA is also available as a Puter app at the URL 'https://puter.com/app/ai-chat'. The UI of the Puter AI PWA is using Google Material Design V3. The PWA cannot be used offline, as the AI is stored on Puter servers (trying to open the app when offline will show a custom error message). If the user encounters any problem with the Puter AI PWA, or ask for a new feature, he can create an issue at the URL 'https://github.com/Zac0511/Puter-AI-PWA/issues/new/choose'."
+    }
+  ];
+
+  function addMessage(msg, isUser) {
+    if (!msg && msg !== '') return;
+    const messagesDiv = document.getElementById("messages");
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("message");
+    if (isUser) {
+      wrapper.classList.add("user-message");
+    }
+    wrapper.textContent = msg;
+    messagesDiv.appendChild(wrapper);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  function addElementMessage(element) {
+    const messagesDiv = document.getElementById("messages");
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("message");
+    wrapper.appendChild(element);
+    messagesDiv.appendChild(wrapper);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  function toggleLoadingSpinner(show) {
+    const spinner = document.getElementById('loading-spinner');
+    spinner.style.display = show ? 'block' : 'none';
+  }
+
+  function getCurrentSettingsFromUI() {
+    return {
+      mode: document.getElementById('modeSelect').value,
+      chatModel: document.getElementById('chatModelSelect').value,
+      imageModel: document.getElementById('imageModelSelect').value,
+      ocrProvider: document.getElementById('ocrProviderSelect').value,
+      ocrModel: document.getElementById('ocrModelSelect').value,
+      ttsProvider: document.getElementById('ttsProviderSelect').value,
+      ttsModel: document.getElementById('ttsModelSelect').value,
+      ttsLanguage: document.getElementById('ttsLanguageInput').value,
+      ttsVoice: document.getElementById('ttsVoiceInput').value,
+      videoModel: document.getElementById('videoModelSelect').value,
+      sttModel: document.getElementById('sttModelSelect').value,
+      sttLanguage: document.getElementById('sttLanguageInput').value,
+      sttResponseFormat: document.getElementById('sttResponseFormatSelect').value,
+      sttTranslate: document.getElementById('sttTranslateCheckbox').checked
+    };
+  }
+
+  function applySettingsToUI(settings) {
+    const s = { ...BUILT_IN_DEFAULTS, ...settings };
+    document.getElementById('modeSelect').value = s.mode;
+    document.getElementById('imageModelSelect').value = s.imageModel;
+    document.getElementById('ocrProviderSelect').value = s.ocrProvider;
+    document.getElementById('ocrModelSelect').value = s.ocrModel;
+    document.getElementById('ttsProviderSelect').value = s.ttsProvider;
+    document.getElementById('ttsModelSelect').value = s.ttsModel;
+    document.getElementById('ttsLanguageInput').value = s.ttsLanguage;
+    document.getElementById('ttsVoiceInput').value = s.ttsVoice;
+    document.getElementById('videoModelSelect').value = s.videoModel;
+    document.getElementById('sttModelSelect').value = s.sttModel;
+    document.getElementById('sttLanguageInput').value = s.sttLanguage;
+    document.getElementById('sttResponseFormatSelect').value = s.sttResponseFormat;
+    document.getElementById('sttTranslateCheckbox').checked = s.sttTranslate;
+    handleOcrModelVisibility();
+    updateModeVisibility();
+  }
+
+  function loadDefaults() {
+    try {
+      const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!raw) return { ...BUILT_IN_DEFAULTS };
+      const parsed = JSON.parse(raw);
+      return { ...BUILT_IN_DEFAULTS, ...parsed };
+    } catch (e) {
+      console.error('Unable to load defaults', e);
+      return { ...BUILT_IN_DEFAULTS };
+    }
+  }
+
+  function saveDefaultsFromUI() {
+    const settings = getCurrentSettingsFromUI();
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(settings));
+      alert('Defaults saved.');
+    } catch (e) {
+      console.error('Unable to save defaults', e);
+      alert('Unable to save defaults (see console).');
+    }
+  }
+
+  function resetDefaults() {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(BUILT_IN_DEFAULTS));
+    } catch (e) {
+      console.error('Unable to reset defaults in storage', e);
+    }
+    applySettingsToUI(BUILT_IN_DEFAULTS);
+  }
+
+  function updateModeVisibility() {
+    const mode = document.getElementById('modeSelect').value;
+
+    const chatOptions = document.getElementById('chatOptions');
+    const imageOptions = document.getElementById('imageOptions');
+    const ocrOptions = document.getElementById('ocrOptions');
+    const ttsOptions = document.getElementById('ttsOptions');
+    const sttOptions = document.getElementById('sttOptions');
+    const videoOptions = document.getElementById('videoOptions');
+    const imageInputWrapper = document.getElementById('imageInputWrapper');
+    const audioInputWrapper = document.getElementById('audioInputWrapper');
+
+    chatOptions.classList.remove('active');
+    imageOptions.classList.remove('active');
+    ocrOptions.classList.remove('active');
+    ttsOptions.classList.remove('active');
+    sttOptions.classList.remove('active');
+    videoOptions.classList.remove('active');
+    imageInputWrapper.style.display = 'none';
+    audioInputWrapper.style.display = 'none';
+
+    if (mode === 'chat') {
+      chatOptions.classList.add('active');
+    } else if (mode === 'txt2img') {
+      imageOptions.classList.add('active');
+    } else if (mode === 'img2txt') {
+      ocrOptions.classList.add('active');
+      imageInputWrapper.style.display = 'block';
+    } else if (mode === 'txt2speech') {
+      ttsOptions.classList.add('active');
+    } else if (mode === 'speech2txt') {
+      sttOptions.classList.add('active');
+      audioInputWrapper.style.display = 'block';
+    } else if (mode === 'txt2vid') {
+      videoOptions.classList.add('active');
+    }
+  }
+
+  async function loadChatModels(defaultModel) {
+    try {
+      const res = await fetch('https://puter.com/puterai/chat/models');
+      const json = await res.json();
+      let models = Array.isArray(json) ? json : (json.models || []);
+      const blacklist = ["abuse", "costly", "fake", "model-fallback-test-1"];
+      models = models.filter(m => typeof m === 'string' && !blacklist.includes(m));
+      models.sort((a, b) => a.localeCompare(b));
+
+      const select = document.getElementById('chatModelSelect');
+      select.innerHTML = '';
+      models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        select.appendChild(opt);
+      });
+
+      if (defaultModel && models.includes(defaultModel)) {
+        select.value = defaultModel;
+      }
+    } catch (e) {
+      console.error('Failed to load chat models from Puter', e);
+      // Leave placeholder; Puter will use its own default model.
+    }
+  }
+
+  function handleOcrModelVisibility() {
+    const provider = document.getElementById('ocrProviderSelect').value;
+    const ocrModelSelect = document.getElementById('ocrModelSelect');
+    const ocrModelInput = document.getElementById('ocrModelInput');
+
+    if (provider === 'mistral') {
+      ocrModelSelect.disabled = false;
+      if (ocrModelSelect.value === '__custom') {
+        ocrModelInput.style.display = 'inline-block';
+      } else {
+        ocrModelInput.style.display = 'none';
+      }
+    } else {
+      ocrModelSelect.disabled = true;
+      ocrModelInput.style.display = 'none';
+    }
+  }
+
+  async function sendMessage(message) {
+    const input = document.querySelector("#messageInput");
+    const mode = document.getElementById('modeSelect').value;
+    let text = (message || input.value || "").trim();
+
+    const imageFile = document.getElementById('imageInput').files[0];
+    const audioFile = document.getElementById('audioInput').files[0];
+
+    if (mode === 'chat' && !text) {
+      return;
+    }
+
+    if (text) {
+      addMessage(text, true);
+      input.value = '';
+    }
+
+    if (mode === 'img2txt' && !imageFile) {
+      alert('Please select an image file for OCR.');
+      return;
+    }
+    if (mode === 'speech2txt' && !audioFile) {
+      alert('Please select an audio file for transcription.');
+      return;
+    }
+
+    console.log("Message sent to Puter AI, mode:", mode);
+    toggleLoadingSpinner(true);
+
+    try {
+      if (mode === 'chat') {
+        const chatModel = document.getElementById('chatModelSelect').value;
+        const messagesPayload = [
+          ...SYSTEM_MESSAGES,
+          { role: 'user', content: text }
+        ];
+        const options = chatModel ? { model: chatModel } : {};
+        const response = await puter.ai.chat(messagesPayload, options);
+        addMessage(response, false);
+      } else if (mode === 'txt2img') {
+        const imgModel = document.getElementById('imageModelSelect').value;
+        const img = await puter.ai.txt2img(text, { model: imgModel });
+        addElementMessage(img);
+      } else if (mode === 'img2txt') {
+        const provider = document.getElementById('ocrProviderSelect').value;
+        const ocrModelSel = document.getElementById('ocrModelSelect').value;
+        const ocrModelCustom = document.getElementById('ocrModelInput').value.trim();
+        const options = { provider };
+        if (provider === 'mistral') {
+          if (ocrModelSel === '__custom' && ocrModelCustom) {
+            options.model = ocrModelCustom;
+          } else if (ocrModelSel && ocrModelSel !== '__custom') {
+            options.model = ocrModelSel;
+          }
+        }
+        const result = await puter.ai.img2txt({ source: imageFile, ...options });
+        addMessage(result, false);
+      } else if (mode === 'txt2speech') {
+        const provider = document.getElementById('ttsProviderSelect').value;
+        const language = document.getElementById('ttsLanguageInput').value.trim();
+        const voice = document.getElementById('ttsVoiceInput').value.trim();
+        const ttsModel = document.getElementById('ttsModelSelect').value;
+
+        const options = {};
+        if (provider) options.provider = provider;
+        if (provider === 'aws-polly') {
+          if (language) options.language = language;
+          if (voice) options.voice = voice;
+        } else if (provider === 'openai' || provider === 'elevenlabs') {
+          if (ttsModel) options.model = ttsModel;
+          if (voice) options.voice = voice;
         }
 
-        // Check for message in URL query params and send it if present
-        window.onload = function() {
-            const message = getQueryParam('message');
-            if (message) {
-                sendMessage(message);
-            }
-        };
+        const audio = await puter.ai.txt2speech(text, options);
+        audio.controls = true;
+        addElementMessage(audio);
+      } else if (mode === 'speech2txt') {
+        const sttModel = document.getElementById('sttModelSelect').value;
+        const sttLang = document.getElementById('sttLanguageInput').value.trim();
+        const sttFormat = document.getElementById('sttResponseFormatSelect').value;
+        const sttTranslate = document.getElementById('sttTranslateCheckbox').checked;
 
-        // Sends the message if enter is pressed
-        document.querySelector("#messageInput").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                sendMessage();
-            }
-        });
+        const options = { model: sttModel };
+        if (sttLang) options.language = sttLang;
+        if (sttFormat) options.response_format = sttFormat;
+        if (sttTranslate) options.translate = true;
 
-        document.querySelector('#sendButton').addEventListener('click', function () {
-            sendMessage();
-        });
-    </script>
+        const result = await puter.ai.speech2txt(audioFile, options);
+        let textOut;
+        if (typeof result === 'string') {
+          textOut = result;
+        } else if (result && typeof result.text === 'string') {
+          textOut = result.text;
+        } else {
+          textOut = JSON.stringify(result);
+        }
+        addMessage(textOut, false);
+      } else if (mode === 'txt2vid') {
+        const videoModel = document.getElementById('videoModelSelect').value;
+        const video = await puter.ai.txt2vid(text, { model: videoModel });
+        video.controls = true;
+        addElementMessage(video);
+      }
+      console.log("AI response received");
+    } catch (error) {
+      console.error("AI response error:", error);
+      alert("An error occured, please try again. If the error persists, please create an issue on the GitHub repository (you can access it by clicking the button with a 'code' icon)");
+    } finally {
+      toggleLoadingSpinner(false);
+    }
+  }
+
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  function initUI() {
+    const defaults = loadDefaults();
+    applySettingsToUI(defaults);
+
+    document.getElementById('modeSelect').addEventListener('change', updateModeVisibility);
+    document.getElementById('saveDefaultButton').addEventListener('click', saveDefaultsFromUI);
+    document.getElementById('resetDefaultButton').addEventListener('click', resetDefaults);
+    document.getElementById('refreshModelsButton').addEventListener('click', () => {
+      const current = document.getElementById('chatModelSelect').value || loadDefaults().chatModel;
+      loadChatModels(current);
+    });
+
+    document.getElementById('ocrProviderSelect').addEventListener('change', handleOcrModelVisibility);
+    document.getElementById('ocrModelSelect').addEventListener('change', handleOcrModelVisibility);
+
+    loadChatModels(defaults.chatModel);
+  }
+
+  document.querySelector("#messageInput").addEventListener("keypress", function (event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  });
+
+  document.querySelector('#sendButton').addEventListener('click', function () {
+    sendMessage();
+  });
+
+  window.addEventListener('load', () => {
+    initUI();
+    const message = getQueryParam('message');
+    if (message) {
+      document.querySelector("#messageInput").value = message;
+      sendMessage();
+    }
+  });
+</script>
 </body>
 
 </html>

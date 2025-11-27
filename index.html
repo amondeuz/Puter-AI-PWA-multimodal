@@ -741,6 +741,89 @@
 
   // ---------- Chat model hierarchy from live endpoint ----------
 
+  // Fallback models when CORS blocks dynamic fetch (for GitHub Pages, etc.)
+  const FALLBACK_CHAT_MODELS = [
+    // Claude models (Anthropic)
+    'claude-sonnet-4-20250514',
+    'claude-3-5-sonnet-20241022',
+    'claude-3-5-sonnet-20240620',
+    'claude-3-opus-20240229',
+    'claude-3-sonnet-20240229',
+    'claude-3-haiku-20240307',
+    
+    // GPT models (OpenAI)
+    'gpt-4o',
+    'gpt-4o-mini',
+    'gpt-4-turbo',
+    'gpt-4',
+    'gpt-3.5-turbo',
+    
+    // Gemini models (Google)
+    'gemini-2.5-flash',
+    'gemini-2.0-flash-exp',
+    'gemini-1.5-pro',
+    'gemini-1.5-flash',
+    
+    // Llama models (Meta) via OpenRouter
+    'openrouter:meta-llama/llama-3.3-70b-instruct',
+    'openrouter:meta-llama/llama-3.2-90b-vision-instruct',
+    'openrouter:meta-llama/llama-3.1-405b-instruct',
+    
+    // Qwen models via OpenRouter
+    'openrouter:qwen/qwen-2.5-72b-instruct',
+    
+    // DeepSeek models via OpenRouter
+    'openrouter:deepseek/deepseek-chat',
+    
+    // Mistral models via OpenRouter
+    'openrouter:mistralai/mistral-large',
+    
+    // Others
+    'openrouter:google/gemini-pro-1.5',
+    'openrouter:anthropic/claude-3.5-sonnet'
+  ];
+
+    // Try live Puter endpoint first, then local models.json, then hardcoded fallback
+  async function loadModelList() {
+    // 1) Live endpoint from Puter
+    try {
+      const res = await fetch('https://puter.com/puterai/chat/models', { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json.models)) {
+          console.log('Loaded live model list from puter.com');
+          return json.models;
+        }
+        console.warn('Live endpoint did not return models[] array');
+      } else {
+        console.warn('Live models endpoint returned', res.status, res.statusText);
+      }
+    } catch (e) {
+      console.warn('Error calling live models endpoint (likely CORS or network):', e);
+    }
+
+    // 2) Local models.json snapshot that you can update manually
+    try {
+      const res = await fetch('models.json', { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json.models)) {
+          console.log('Loaded fallback model list from local models.json');
+          return json.models;
+        }
+        console.warn('Local models.json did not contain models[] array');
+      } else {
+        console.warn('Local models.json fetch failed:', res.status, res.statusText);
+      }
+    } catch (e) {
+      console.error('Error loading local models.json:', e);
+    }
+
+    // 3) Last resort: hardcoded fallback list (may be incomplete)
+    console.warn('Falling back to hardcoded fallback chat models');
+    return FALLBACK_CHAT_MODELS.slice();
+  }
+
   function parseModelId(id) {
     const OPENROUTER_PREFIX = 'openrouter:';
     const result = {
@@ -766,35 +849,15 @@
     return result;
   }
 
-  async function initChatModelSelectors(defaults) {
-    const scopeSelect = document.getElementById('chatScopeSelect');
-    const companySelect = document.getElementById('chatCompanySelect');
-    const modelSelect = document.getElementById('chatModelSelect');
-
-    if (!scopeSelect || !companySelect || !modelSelect) return;
-
-    let defaultScope = (defaults && defaults.chatScope) || 'direct';
-    let defaultCompany = (defaults && defaults.chatCompany) || '__all';
-    let defaultModelId = (defaults && defaults.chatModel) || '';
-
-    try {
-      const res = await fetch('https://puter.com/puterai/chat/models', { cache: 'no-store' });
-      if (!res.ok) {
-        console.error('Failed to load live model list', res.status, res.statusText);
-        return;
-      }
-      const json = await res.json();
-      const raw = Array.isArray(json.models) ? json.models : [];
-      CHAT_MODEL_DATA = raw.map(parseModelId);
-    } catch (e) {
-      console.error('Error loading live models', e);
-      return;
-    }
+      // Use the combined loader: live → models.json → fallback array
+    const raw = await loadModelList();
+    CHAT_MODEL_DATA = raw.map(parseModelId);
 
     if (!CHAT_MODEL_DATA.length) {
-      console.warn('No chat models returned from live endpoint');
+      console.error('No chat models available from live endpoint, models.json, or fallback list');
       return;
     }
+
 
     const matchingDefault = CHAT_MODEL_DATA.find(m => m.id === defaultModelId);
     if (matchingDefault) {

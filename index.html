@@ -211,6 +211,14 @@
       color: #555;
       width: 100%;
     }
+
+    #openaiVoiceRow,
+    #customVoiceRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
   </style>
 
   <script src="https://js.puter.com/v2/"></script>
@@ -242,10 +250,11 @@
     <div id="chatOptions" class="mode-options">
       <label for="chatModelSelect">Chat model:</label>
       <select id="chatModelSelect">
-        <option value="">Loading models… (defaults to gpt-5-nano)</option>
+        <!-- Options populated statically in JS -->
       </select>
       <span class="help-text">
-        Chat models come from Puter’s live model list (includes Kimi, DeepSeek, Llama, etc.).
+        Chat model list is loaded from a static array in this app. Leaving it blank uses Puter’s default
+        chat model for your account (currently gpt-5-nano).
       </span>
     </div>
 
@@ -330,20 +339,43 @@
         <option value="openai">openai</option>
         <option value="elevenlabs">elevenlabs</option>
       </select>
+
       <label for="ttsModelSelect">TTS model (OpenAI / ElevenLabs):</label>
       <select id="ttsModelSelect">
-        <option value="gpt-4o-mini-tts">gpt-4o-mini-tts</option>
-        <option value="tts-1">tts-1</option>
-        <option value="tts-1-hd">tts-1-hd</option>
-        <option value="eleven_multilingual_v2">eleven_multilingual_v2 (11Labs)</option>
+        <option value="gpt-4o-mini-tts">gpt-4o-mini-tts (OpenAI)</option>
+        <option value="tts-1">tts-1 (OpenAI)</option>
+        <option value="tts-1-hd">tts-1-hd (OpenAI)</option>
+        <option value="eleven_multilingual_v2">eleven_multilingual_v2 (ElevenLabs)</option>
       </select>
+
       <label for="ttsLanguageInput">Language (AWS code):</label>
       <input id="ttsLanguageInput" type="text" value="en-US" />
-      <label for="ttsVoiceInput">Voice:</label>
-      <input id="ttsVoiceInput" type="text" placeholder="e.g. Joanna, alloy or voice id" />
+
+      <div id="openaiVoiceRow">
+        <label for="openaiVoiceSelect">OpenAI voice:</label>
+        <select id="openaiVoiceSelect">
+          <option value="alloy">alloy</option>
+          <option value="ash">ash</option>
+          <option value="ballad">ballad</option>
+          <option value="coral">coral</option>
+          <option value="echo">echo</option>
+          <option value="fable">fable</option>
+          <option value="nova">nova</option>
+          <option value="onyx">onyx</option>
+          <option value="sage">sage</option>
+          <option value="shimmer">shimmer</option>
+        </select>
+      </div>
+
+      <div id="customVoiceRow">
+        <label for="ttsVoiceInput">Voice (Polly name or ElevenLabs ID):</label>
+        <input id="ttsVoiceInput" type="text" placeholder="Joanna for Polly, or ElevenLabs voice id" />
+      </div>
+
       <span class="help-text">
-        AWS Polly uses <code>language</code>/<code>voice</code>. OpenAI and ElevenLabs use the
-        <code>model</code> plus a voice name or ID. 
+        AWS Polly uses <code>language</code> and a voice name (for example Joanna). OpenAI uses a TTS model
+        plus one of the documented built-in voices. ElevenLabs uses <code>eleven_multilingual_v2</code> plus
+        your chosen voice ID.
       </span>
     </div>
 
@@ -375,19 +407,19 @@
     </div>
 
     <div id="videoOptions" class="mode-options">
-	  <label for="videoModelSelect">Video model:</label>
-	  <select id="videoModelSelect">
-		<option value="sora-2">sora-2 (OpenAI)</option>
-		<option value="sora-2-pro">sora-2-pro (OpenAI)</option>
-		<option value="ByteDance/Seedance-1.0-lite">ByteDance/Seedance-1.0-lite (fast)</option>
-		<option value="ByteDance/Seedance-1.0-pro">ByteDance/Seedance-1.0-pro (quality)</option>
-		<option value="Wan-AI/Wan2.2-T2V-A14B">Wan-AI/Wan2.2-T2V-A14B</option>
-	  </select>
-	  <span class="help-text">
-		Sora models are from OpenAI. Seedance and Wan models come from the generic text to video API family and
-		are exposed through <code>puter.ai.txt2vid()</code>.
-	  </span>
-	</div>
+      <label for="videoModelSelect">Video model:</label>
+      <select id="videoModelSelect">
+        <option value="sora-2">sora-2 (OpenAI)</option>
+        <option value="sora-2-pro">sora-2-pro (OpenAI)</option>
+        <option value="ByteDance/Seedance-1.0-lite">ByteDance/Seedance-1.0-lite (fast)</option>
+        <option value="ByteDance/Seedance-1.0-pro">ByteDance/Seedance-1.0-pro (quality)</option>
+        <option value="Wan-AI/Wan2.2-T2V-A14B">Wan-AI/Wan2.2-T2V-A14B</option>
+      </select>
+      <span class="help-text">
+        Sora models are from OpenAI. Seedance and Wan models come from the generic text to video API family and
+        are exposed through <code>puter.ai.txt2vid()</code>.
+      </span>
+    </div>
 
     <div id="file-inputs">
       <div id="imageInputWrapper" style="display:none;">
@@ -450,6 +482,15 @@
     sttResponseFormat: 'text',
     sttTranslate: false
   };
+
+  // Fill this with the model IDs you see in https://puter.com/puterai/chat/models
+  // for your account. Example values (do NOT assume these are correct without
+  // checking): "gpt-5-nano", "gpt-4.1-mini", "kimi-k2-...", etc.
+  const STATIC_CHAT_MODELS = [
+    // "gpt-5-nano",
+    // "gpt-5-mini",
+    // ...
+  ];
 
   const SYSTEM_MESSAGES = [
     {
@@ -514,6 +555,7 @@
 
   function applySettingsToUI(settings) {
     const s = { ...BUILT_IN_DEFAULTS, ...settings };
+
     document.getElementById('modeSelect').value = s.mode;
     document.getElementById('imageModelSelect').value = s.imageModel;
     document.getElementById('ocrProviderSelect').value = s.ocrProvider;
@@ -527,8 +569,16 @@
     document.getElementById('sttLanguageInput').value = s.sttLanguage;
     document.getElementById('sttResponseFormatSelect').value = s.sttResponseFormat;
     document.getElementById('sttTranslateCheckbox').checked = s.sttTranslate;
+
+    // Chat model is applied after chat model options are populated.
+    const chatSelect = document.getElementById('chatModelSelect');
+    if (chatSelect && s.chatModel) {
+      chatSelect.value = s.chatModel;
+    }
+
     handleOcrModelVisibility();
     updateModeVisibility();
+    updateTtsUi();
   }
 
   function loadDefaults() {
@@ -601,30 +651,33 @@
     }
   }
 
-  async function loadChatModels(defaultModel) {
-    try {
-      const res = await fetch('https://puter.com/puterai/chat/models');
-      const json = await res.json();
-      let models = Array.isArray(json) ? json : (json.models || []);
-      const blacklist = ["abuse", "costly", "fake", "model-fallback-test-1"];
-      models = models.filter(m => typeof m === 'string' && !blacklist.includes(m));
-      models.sort((a, b) => a.localeCompare(b));
+  function loadChatModels(defaultModel) {
+    const select = document.getElementById('chatModelSelect');
+    if (!select) return;
 
-      const select = document.getElementById('chatModelSelect');
-      select.innerHTML = '';
-      models.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        select.appendChild(opt);
-      });
+    select.innerHTML = '';
 
-      if (defaultModel && models.includes(defaultModel)) {
-        select.value = defaultModel;
-      }
-    } catch (e) {
-      console.error('Failed to load chat models from Puter', e);
-      // Leave placeholder; Puter will use its own default model.
+    if (!Array.isArray(STATIC_CHAT_MODELS) || STATIC_CHAT_MODELS.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'Use Puter default chat model';
+      select.appendChild(opt);
+      return;
+    }
+
+    const models = [...STATIC_CHAT_MODELS].sort((a, b) => a.localeCompare(b));
+
+    models.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      select.appendChild(opt);
+    });
+
+    if (defaultModel && models.includes(defaultModel)) {
+      select.value = defaultModel;
+    } else {
+      select.value = '';
     }
   }
 
@@ -643,6 +696,66 @@
     } else {
       ocrModelSelect.disabled = true;
       ocrModelInput.style.display = 'none';
+    }
+  }
+
+  function updateTtsUi() {
+    const provider = document.getElementById('ttsProviderSelect').value;
+    const ttsModelSelect = document.getElementById('ttsModelSelect');
+    const ttsLanguageInput = document.getElementById('ttsLanguageInput');
+    const openaiVoiceRow = document.getElementById('openaiVoiceRow');
+    const openaiVoiceSelect = document.getElementById('openaiVoiceSelect');
+    const customVoiceRow = document.getElementById('customVoiceRow');
+    const customVoiceInput = document.getElementById('ttsVoiceInput');
+
+    if (provider === 'openai') {
+      Array.from(ttsModelSelect.options).forEach(opt => {
+        const isOpenAi = opt.value === 'gpt-4o-mini-tts' ||
+          opt.value === 'tts-1' ||
+          opt.value === 'tts-1-hd';
+        opt.disabled = !isOpenAi;
+      });
+      if (ttsModelSelect.value === 'eleven_multilingual_v2') {
+        ttsModelSelect.value = 'gpt-4o-mini-tts';
+      }
+      ttsModelSelect.disabled = false;
+
+      ttsLanguageInput.disabled = true;
+      ttsLanguageInput.style.opacity = '0.5';
+
+      openaiVoiceRow.style.opacity = '1';
+      openaiVoiceSelect.disabled = false;
+
+      customVoiceRow.style.opacity = '0.5';
+      customVoiceInput.disabled = true;
+    } else if (provider === 'elevenlabs') {
+      ttsModelSelect.value = 'eleven_multilingual_v2';
+      ttsModelSelect.disabled = true;
+
+      ttsLanguageInput.disabled = true;
+      ttsLanguageInput.style.opacity = '0.5';
+
+      openaiVoiceRow.style.opacity = '0.5';
+      openaiVoiceSelect.disabled = true;
+
+      customVoiceRow.style.opacity = '1';
+      customVoiceInput.disabled = false;
+      if (!customVoiceInput.value) {
+        // Public "Rachel" sample voice from the ElevenLabs tutorial
+        customVoiceInput.value = '21m00Tcm4TlvDq8ikWAM';
+      }
+    } else {
+      // aws-polly
+      ttsModelSelect.disabled = true;
+
+      ttsLanguageInput.disabled = false;
+      ttsLanguageInput.style.opacity = '1';
+
+      openaiVoiceRow.style.opacity = '0.5';
+      openaiVoiceSelect.disabled = true;
+
+      customVoiceRow.style.opacity = '1';
+      customVoiceInput.disabled = false;
     }
   }
 
@@ -706,17 +819,32 @@
       } else if (mode === 'txt2speech') {
         const provider = document.getElementById('ttsProviderSelect').value;
         const language = document.getElementById('ttsLanguageInput').value.trim();
-        const voice = document.getElementById('ttsVoiceInput').value.trim();
+        const customVoice = document.getElementById('ttsVoiceInput').value.trim();
         const ttsModel = document.getElementById('ttsModelSelect').value;
+        const openaiVoice = document.getElementById('openaiVoiceSelect').value;
 
-        const options = {};
-        if (provider) options.provider = provider;
-        if (provider === 'aws-polly') {
-          if (language) options.language = language;
-          if (voice) options.voice = voice;
-        } else if (provider === 'openai' || provider === 'elevenlabs') {
-          if (ttsModel) options.model = ttsModel;
-          if (voice) options.voice = voice;
+        let options;
+
+        if (provider === 'openai') {
+          options = {
+            provider: 'openai',
+            model: ttsModel || 'gpt-4o-mini-tts',
+            voice: openaiVoice || 'alloy',
+            response_format: 'mp3'
+          };
+        } else if (provider === 'elevenlabs') {
+          options = {
+            provider: 'elevenlabs',
+            model: 'eleven_multilingual_v2',
+            voice: customVoice || '21m00Tcm4TlvDq8ikWAM'
+          };
+        } else {
+          // aws-polly
+          options = {
+            provider: 'aws-polly',
+            language: language || 'en-US',
+            voice: customVoice || 'Joanna'
+          };
         }
 
         const audio = await puter.ai.txt2speech(text, options);
@@ -765,6 +893,9 @@
 
   function initUI() {
     const defaults = loadDefaults();
+
+    // Chat models first (so applySettings can set chatModel value)
+    loadChatModels(defaults.chatModel);
     applySettingsToUI(defaults);
 
     document.getElementById('modeSelect').addEventListener('change', updateModeVisibility);
@@ -778,7 +909,8 @@
     document.getElementById('ocrProviderSelect').addEventListener('change', handleOcrModelVisibility);
     document.getElementById('ocrModelSelect').addEventListener('change', handleOcrModelVisibility);
 
-    loadChatModels(defaults.chatModel);
+    document.getElementById('ttsProviderSelect').addEventListener('change', updateTtsUi);
+    document.getElementById('ttsModelSelect').addEventListener('change', updateTtsUi);
   }
 
   document.querySelector("#messageInput").addEventListener("keypress", function (event) {

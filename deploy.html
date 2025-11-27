@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+      (async () => {
+        // Folder you created in Puter file manager
+        const dirName = 'Puter-AI-PWA-multimodal';
+
+        // Pick a unique subdomain; lowercase, no spaces
+        const subdomain = 'amon-multimodal-ai';
+
+        // Deploy the website from that directory
+        const site = await puter.hosting.create(subdomain, dirName);
+
+        console.log('Deployed at: https://' + site.subdomain + '.puter.site');
+        puter.print(
+          'Deployed at: <a href="https://' +
+            site.subdomain +
+            '.puter.site" target="_blank">' +
+            site.subdomain +
+            '.puter.site</a>'
+        );
+      })();
+    </script>
+  </body>
+</html>

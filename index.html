@@ -248,15 +248,29 @@
     </div>
 
     <div id="chatOptions" class="mode-options">
-      <label for="chatModelSelect">Chat model:</label>
-      <select id="chatModelSelect">
-        <!-- Options populated statically in JS -->
+      <label for="chatScopeSelect">Source:</label>
+      <select id="chatScopeSelect">
+        <option value="direct">Direct (non-OpenRouter)</option>
+        <option value="openrouter">OpenRouter</option>
       </select>
+
+      <label for="chatCompanySelect">Company / namespace:</label>
+      <select id="chatCompanySelect">
+        <option value="__all">All companies</option>
+      </select>
+
+      <label for="chatModelSelect">Model:</label>
+      <select id="chatModelSelect">
+        <!-- Populated from live model list -->
+      </select>
+
       <span class="help-text">
-        Chat model list is loaded from a static array in this app. Leaving it blank uses Puter’s default
-        chat model for your account (currently gpt-5-nano).
+        Models are loaded live from Puter - the list comes from
+        <code>https://puter.com/puterai/chat/models</code>. Source splits OpenRouter models from everything
+        else, and the company field groups providers under OpenRouter.
       </span>
     </div>
+
 
     <div id="imageOptions" class="mode-options">
       <label for="imageModelSelect">Image model:</label>
@@ -468,6 +482,8 @@
 
   const BUILT_IN_DEFAULTS = {
     mode: 'chat',
+    chatScope: 'direct',
+    chatCompany: '__all',
     chatModel: '',
     imageModel: 'gpt-image-1-mini',
     ocrProvider: 'aws-textract',
@@ -483,14 +499,8 @@
     sttTranslate: false
   };
 
-  // Fill this with the model IDs you see in https://puter.com/puterai/chat/models
-  // for your account. Example values (do NOT assume these are correct without
-  // checking): "gpt-5-nano", "gpt-4.1-mini", "kimi-k2-...", etc.
-  const STATIC_CHAT_MODELS = [
-    // "gpt-5-nano",
-    // "gpt-5-mini",
-    // ...
-  ];
+  // Live model cache
+  let CHAT_MODEL_DATA = [];
 
   const SYSTEM_MESSAGES = [
     {
@@ -512,9 +522,7 @@
     const messagesDiv = document.getElementById("messages");
     const wrapper = document.createElement("div");
     wrapper.classList.add("message");
-    if (isUser) {
-      wrapper.classList.add("user-message");
-    }
+    if (isUser) wrapper.classList.add("user-message");
     wrapper.textContent = msg;
     messagesDiv.appendChild(wrapper);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -537,6 +545,8 @@
   function getCurrentSettingsFromUI() {
     return {
       mode: document.getElementById('modeSelect').value,
+      chatScope: document.getElementById('chatScopeSelect').value,
+      chatCompany: document.getElementById('chatCompanySelect').value,
       chatModel: document.getElementById('chatModelSelect').value,
       imageModel: document.getElementById('imageModelSelect').value,
       ocrProvider: document.getElementById('ocrProviderSelect').value,
@@ -557,6 +567,13 @@
     const s = { ...BUILT_IN_DEFAULTS, ...settings };
 
     document.getElementById('modeSelect').value = s.mode;
+
+    // Scope and company are applied before we build the model list
+    const scopeSel = document.getElementById('chatScopeSelect');
+    const companySel = document.getElementById('chatCompanySelect');
+    if (scopeSel) scopeSel.value = s.chatScope;
+    if (companySel) companySel.value = s.chatCompany;
+
     document.getElementById('imageModelSelect').value = s.imageModel;
     document.getElementById('ocrProviderSelect').value = s.ocrProvider;
     document.getElementById('ocrModelSelect').value = s.ocrModel;
@@ -569,12 +586,6 @@
     document.getElementById('sttLanguageInput').value = s.sttLanguage;
     document.getElementById('sttResponseFormatSelect').value = s.sttResponseFormat;
     document.getElementById('sttTranslateCheckbox').checked = s.sttTranslate;
-
-    // Chat model is applied after chat model options are populated.
-    const chatSelect = document.getElementById('chatModelSelect');
-    if (chatSelect && s.chatModel) {
-      chatSelect.value = s.chatModel;
-    }
 
     handleOcrModelVisibility();
     updateModeVisibility();
@@ -651,36 +662,6 @@
     }
   }
 
-  function loadChatModels(defaultModel) {
-    const select = document.getElementById('chatModelSelect');
-    if (!select) return;
-
-    select.innerHTML = '';
-
-    if (!Array.isArray(STATIC_CHAT_MODELS) || STATIC_CHAT_MODELS.length === 0) {
-      const opt = document.createElement('option');
-      opt.value = '';
-      opt.textContent = 'Use Puter default chat model';
-      select.appendChild(opt);
-      return;
-    }
-
-    const models = [...STATIC_CHAT_MODELS].sort((a, b) => a.localeCompare(b));
-
-    models.forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m;
-      opt.textContent = m;
-      select.appendChild(opt);
-    });
-
-    if (defaultModel && models.includes(defaultModel)) {
-      select.value = defaultModel;
-    } else {
-      select.value = '';
-    }
-  }
-
   function handleOcrModelVisibility() {
     const provider = document.getElementById('ocrProviderSelect').value;
     const ocrModelSelect = document.getElementById('ocrModelSelect');
@@ -741,7 +722,6 @@
       customVoiceRow.style.opacity = '1';
       customVoiceInput.disabled = false;
       if (!customVoiceInput.value) {
-        // Public "Rachel" sample voice from the ElevenLabs tutorial
         customVoiceInput.value = '21m00Tcm4TlvDq8ikWAM';
       }
     } else {
@@ -758,6 +738,141 @@
       customVoiceInput.disabled = false;
     }
   }
+
+  // ---------- Chat model hierarchy from live endpoint ----------
+
+  function parseModelId(id) {
+    const OPENROUTER_PREFIX = 'openrouter:';
+    const result = {
+      id,
+      isOpenRouter: false,
+      company: 'builtin',
+      name: id
+    };
+
+    if (id.startsWith(OPENROUTER_PREFIX)) {
+      result.isOpenRouter = true;
+      const rest = id.slice(OPENROUTER_PREFIX.length);
+      const slashIndex = rest.indexOf('/');
+      if (slashIndex >= 0) {
+        result.company = rest.slice(0, slashIndex);
+        result.name = rest.slice(slashIndex + 1);
+      } else {
+        result.company = 'openrouter';
+        result.name = rest;
+      }
+    }
+
+    return result;
+  }
+
+  async function initChatModelSelectors(defaults) {
+    const scopeSelect = document.getElementById('chatScopeSelect');
+    const companySelect = document.getElementById('chatCompanySelect');
+    const modelSelect = document.getElementById('chatModelSelect');
+
+    if (!scopeSelect || !companySelect || !modelSelect) return;
+
+    let defaultScope = (defaults && defaults.chatScope) || 'direct';
+    let defaultCompany = (defaults && defaults.chatCompany) || '__all';
+    let defaultModelId = (defaults && defaults.chatModel) || '';
+
+    try {
+      const res = await fetch('https://puter.com/puterai/chat/models', { cache: 'no-store' });
+      if (!res.ok) {
+        console.error('Failed to load live model list', res.status, res.statusText);
+        return;
+      }
+      const json = await res.json();
+      const raw = Array.isArray(json.models) ? json.models : [];
+      CHAT_MODEL_DATA = raw.map(parseModelId);
+    } catch (e) {
+      console.error('Error loading live models', e);
+      return;
+    }
+
+    if (!CHAT_MODEL_DATA.length) {
+      console.warn('No chat models returned from live endpoint');
+      return;
+    }
+
+    const matchingDefault = CHAT_MODEL_DATA.find(m => m.id === defaultModelId);
+    if (matchingDefault) {
+      defaultScope = matchingDefault.isOpenRouter ? 'openrouter' : 'direct';
+      defaultCompany = matchingDefault.company;
+    }
+
+    function filteredModels(scope, company) {
+      return CHAT_MODEL_DATA.filter(m => {
+        if (scope === 'openrouter' && !m.isOpenRouter) return false;
+        if (scope === 'direct' && m.isOpenRouter) return false;
+        if (company && company !== '__all' && m.company !== company) return false;
+        return true;
+      });
+    }
+
+    function populateCompanies(scope, selectedCompany) {
+      const models = filteredModels(scope, null);
+      const companies = Array.from(new Set(models.map(m => m.company)))
+        .sort((a, b) => a.localeCompare(b));
+
+      companySelect.innerHTML = '';
+
+      const allOpt = document.createElement('option');
+      allOpt.value = '__all';
+      allOpt.textContent = 'All companies';
+      companySelect.appendChild(allOpt);
+
+      companies.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        companySelect.appendChild(opt);
+      });
+
+      if (selectedCompany && companies.includes(selectedCompany)) {
+        companySelect.value = selectedCompany;
+      } else {
+        companySelect.value = '__all';
+      }
+    }
+
+    function populateModels(scope, company, selectedId) {
+      const models = filteredModels(scope, company).sort((a, b) => a.name.localeCompare(b.name));
+
+      modelSelect.innerHTML = '';
+      models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.name;
+        modelSelect.appendChild(opt);
+      });
+
+      if (selectedId && models.some(m => m.id === selectedId)) {
+        modelSelect.value = selectedId;
+      } else if (models.length) {
+        modelSelect.value = models[0].id;
+      }
+    }
+
+    scopeSelect.onchange = () => {
+      const scope = scopeSelect.value;
+      populateCompanies(scope, null);
+      populateModels(scope, companySelect.value, null);
+    };
+
+    companySelect.onchange = () => {
+      const scope = scopeSelect.value;
+      const company = companySelect.value;
+      populateModels(scope, company, null);
+    };
+
+    scopeSelect.value = defaultScope;
+    populateCompanies(defaultScope, defaultCompany);
+    populateModels(defaultScope, companySelect.value, defaultModelId);
+  }
+
+  // ---------- Core send logic ----------
 
   async function sendMessage(message) {
     const input = document.querySelector("#messageInput");
@@ -839,7 +954,6 @@
             voice: customVoice || '21m00Tcm4TlvDq8ikWAM'
           };
         } else {
-          // aws-polly
           options = {
             provider: 'aws-polly',
             language: language || 'en-US',
@@ -894,16 +1008,22 @@
   function initUI() {
     const defaults = loadDefaults();
 
-    // Chat models first (so applySettings can set chatModel value)
-    loadChatModels(defaults.chatModel);
     applySettingsToUI(defaults);
+
+    // Initialize chat model selectors from live endpoint
+    initChatModelSelectors(defaults);
 
     document.getElementById('modeSelect').addEventListener('change', updateModeVisibility);
     document.getElementById('saveDefaultButton').addEventListener('click', saveDefaultsFromUI);
     document.getElementById('resetDefaultButton').addEventListener('click', resetDefaults);
+
     document.getElementById('refreshModelsButton').addEventListener('click', () => {
-      const current = document.getElementById('chatModelSelect').value || loadDefaults().chatModel;
-      loadChatModels(current);
+      const current = getCurrentSettingsFromUI();
+      initChatModelSelectors({
+        chatScope: current.chatScope,
+        chatCompany: current.chatCompany,
+        chatModel: current.chatModel
+      });
     });
 
     document.getElementById('ocrProviderSelect').addEventListener('change', handleOcrModelVisibility);
@@ -933,6 +1053,7 @@
     }
   });
 </script>
+
 </body>
 
 </html>

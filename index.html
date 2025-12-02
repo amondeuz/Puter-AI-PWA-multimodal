@@ -781,41 +781,23 @@
   // Company lookup database (loaded from external file)
   let MODEL_COMPANY_DATABASE = null;
 
-  // Free models list and toggle state
-  let FREE_MODELS_LIST = null;
+  // Free-only mode toggle state
   let FREE_ONLY_MODE = false;
 
   // Test/utility models to exclude from model list
   const EXCLUDED_MODELS = ['model-fallback-test-1', 'fake', 'costly', 'abuse'];
 
   /**
-   * Load the free models list from free-models.json.
-   * This provides a curated list of 29 free models (models with :free suffix).
-   */
-  async function loadFreeModelsList() {
-    try {
-      const res = await fetch('free-models.json');
-      if (res.ok) {
-        FREE_MODELS_LIST = await res.json();
-        console.log(`Free models list loaded: ${FREE_MODELS_LIST.free_models.length} free models`);
-        return true;
-      }
-    } catch (e) {
-      console.warn('Free models list not available:', e.message);
-    }
-    return false;
-  }
-
-  /**
    * Check if a model is in the free models list.
+   * Uses the model company database's free_models array.
    * @param {string} modelId - The full model ID (e.g. "openrouter:moonshotai/kimi-k2:free")
    * @returns {boolean} - True if the model is in the free list
    */
   function isModelFree(modelId) {
-    if (!FREE_MODELS_LIST || !FREE_MODELS_LIST.free_models) {
+    if (!MODEL_COMPANY_DATABASE || !MODEL_COMPANY_DATABASE.metadata || !MODEL_COMPANY_DATABASE.metadata.free_models) {
       return false;
     }
-    return FREE_MODELS_LIST.free_models.includes(modelId);
+    return MODEL_COMPANY_DATABASE.metadata.free_models.includes(modelId);
   }
 
   /**
@@ -836,6 +818,13 @@
   async function setupFreeOnlyToggle() {
     const checkbox = document.getElementById('freeOnlyCheckbox');
     if (!checkbox) return;
+
+    // Update the label with the actual count from the database
+    const label = document.querySelector('label[for="freeOnlyCheckbox"]');
+    if (label && MODEL_COMPANY_DATABASE && MODEL_COMPANY_DATABASE.metadata) {
+      const freeCount = MODEL_COMPANY_DATABASE.metadata.total_free_models || 29;
+      label.textContent = `☐ Free Models Only (${freeCount} models)`;
+    }
 
     // Load saved preference
     try {
@@ -998,11 +987,8 @@
     let defaultCompany = (defaults && defaults.chatCompany) || '__all';
     let defaultModelId = (defaults && defaults.chatModel) || '';
 
-    // Load company database first
+    // Load company database (includes free models list)
     await loadModelCompanyDatabase();
-
-    // Load free models list
-    await loadFreeModelsList();
 
     try {
       // Fetch from LOCAL models.json file

@@ -1,10 +1,41 @@
 {
   "metadata": {
-    "version": "3.0.0",
-    "last_updated": "2025-11-30",
+    "version": "3.1.0",
+    "last_updated": "2025-12-02",
     "description": "Complete AI Model to Company/Provider mapping - ALL 85 companies from Puter",
     "total_companies": 85,
-    "total_models": 557
+    "total_models": 557,
+    "total_free_models": 29,
+    "free_models": [
+      "openrouter:alibaba/tongyi-deepresearch-30b-a3b:free",
+      "openrouter:cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+      "openrouter:deepseek/deepseek-r1-distill-llama-70b:free",
+      "openrouter:google/gemini-2.0-flash-exp:free",
+      "openrouter:google/gemma-3-12b-it:free",
+      "openrouter:google/gemma-3-27b-it:free",
+      "openrouter:google/gemma-3-4b-it:free",
+      "openrouter:google/gemma-3n-e2b-it:free",
+      "openrouter:google/gemma-3n-e4b-it:free",
+      "openrouter:kwaipilot/kat-coder-pro:free",
+      "openrouter:meituan/longcat-flash-chat:free",
+      "openrouter:meta-llama/llama-3.2-3b-instruct:free",
+      "openrouter:meta-llama/llama-3.3-70b-instruct:free",
+      "openrouter:mistralai/mistral-7b-instruct:free",
+      "openrouter:mistralai/mistral-small-3.1-24b-instruct:free",
+      "openrouter:moonshotai/kimi-k2:free",
+      "openrouter:nousresearch/hermes-3-llama-3.1-405b:free",
+      "openrouter:nvidia/nemotron-nano-12b-v2-vl:free",
+      "openrouter:nvidia/nemotron-nano-9b-v2:free",
+      "openrouter:openai/gpt-oss-20b:free",
+      "openrouter:qwen/qwen3-235b-a22b:free",
+      "openrouter:qwen/qwen3-4b:free",
+      "openrouter:qwen/qwen3-coder:free",
+      "openrouter:tngtech/deepseek-r1t-chimera:free",
+      "openrouter:tngtech/deepseek-r1t2-chimera:free",
+      "openrouter:tngtech/tng-r1t-chimera:free",
+      "openrouter:x-ai/grok-4.1-fast:free",
+      "openrouter:z-ai/glm-4.5-air:free"
+    ]
   },
   "model_registry": {
     "ai21": {

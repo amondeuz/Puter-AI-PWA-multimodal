@@ -1,0 +1,1648 @@
+{
+  "metadata": {
+    "version": "3.0.0",
+    "last_updated": "2025-11-30",
+    "description": "Complete AI Model to Company/Provider mapping - ALL 85 companies from Puter",
+    "total_companies": 85,
+    "total_models": 557
+  },
+  "model_registry": {
+    "ai21": {
+      "company_name": "AI21 Labs",
+      "description": "Jamba hybrid SSM-Transformer models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:ai21/jamba-large-1.7",
+        "openrouter:ai21/jamba-mini-1.7"
+      ],
+      "total_models": 2
+    },
+    "aion-labs": {
+      "company_name": "Aion Labs",
+      "description": "Aion family of language models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:aion-labs/aion-1.0",
+        "openrouter:aion-labs/aion-1.0-mini",
+        "openrouter:aion-labs/aion-rp-llama-3.1-8b"
+      ],
+      "total_models": 3
+    },
+    "alfredpros": {
+      "company_name": "AlfredPros",
+      "description": "CodeLlama fine-tuned for Solidity",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:alfredpros/codellama-7b-instruct-solidity"
+      ],
+      "total_models": 1
+    },
+    "alibaba": {
+      "company_name": "Alibaba Cloud",
+      "description": "Qwen family through OpenRouter",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:alibaba/tongyi-deepresearch-30b-a3b",
+        "openrouter:alibaba/tongyi-deepresearch-30b-a3b:free"
+      ],
+      "total_models": 2
+    },
+    "alibaba-nlp": {
+      "company_name": "Alibaba NLP",
+      "description": "GTE embedding models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:Alibaba-NLP/gte-modernbert-base"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "allenai": {
+      "company_name": "Allen Institute for AI",
+      "description": "OLMo open language models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:allenai/olmo-2-0325-32b-instruct",
+        "openrouter:allenai/olmo-3-32b-think",
+        "openrouter:allenai/olmo-3-7b-instruct",
+        "openrouter:allenai/olmo-3-7b-think"
+      ],
+      "total_models": 4
+    },
+    "alpindale": {
+      "company_name": "Alpindale",
+      "description": "Goliath community fine-tune",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:alpindale/goliath-120b"
+      ],
+      "total_models": 1
+    },
+    "amazon": {
+      "company_name": "Amazon Web Services",
+      "description": "Nova and Titan model families",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:amazon/nova-lite-v1",
+        "openrouter:amazon/nova-micro-v1",
+        "openrouter:amazon/nova-premier-v1",
+        "openrouter:amazon/nova-pro-v1"
+      ],
+      "total_models": 4
+    },
+    "anthracite-org": {
+      "company_name": "Anthracite",
+      "description": "Magnum community fine-tunes",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:anthracite-org/magnum-v4-72b"
+      ],
+      "total_models": 1
+    },
+    "anthropic": {
+      "company_name": "Anthropic",
+      "description": "Claude family - Opus, Sonnet, Haiku",
+      "direct_api": [
+        "claude-3-5-sonnet-20240620",
+        "claude-3-5-sonnet-20241022",
+        "claude-3-5-sonnet-latest",
+        "claude-3-7-sonnet-20250219",
+        "claude-3-7-sonnet-latest",
+        "claude-3-haiku-20240307",
+        "claude-haiku-4-5",
+        "claude-haiku-4-5-20251001",
+        "claude-haiku-4.5",
+        "claude-opus-4",
+        "claude-opus-4-1",
+        "claude-opus-4-1-20250805",
+        "claude-opus-4-20250514",
+        "claude-opus-4-5",
+        "claude-opus-4-5-latest",
+        "claude-opus-4-latest",
+        "claude-opus-4.5",
+        "claude-sonnet-4",
+        "claude-sonnet-4-20250514",
+        "claude-sonnet-4-5",
+        "claude-sonnet-4-5-20250929",
+        "claude-sonnet-4-latest",
+        "claude-sonnet-4.5"
+      ],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:anthropic/claude-3-haiku",
+        "openrouter:anthropic/claude-3-opus",
+        "openrouter:anthropic/claude-3.5-haiku",
+        "openrouter:anthropic/claude-3.5-haiku-20241022",
+        "openrouter:anthropic/claude-3.5-sonnet",
+        "openrouter:anthropic/claude-3.7-sonnet",
+        "openrouter:anthropic/claude-3.7-sonnet:thinking",
+        "openrouter:anthropic/claude-haiku-4.5",
+        "openrouter:anthropic/claude-opus-4",
+        "openrouter:anthropic/claude-opus-4.1",
+        "openrouter:anthropic/claude-opus-4.5",
+        "openrouter:anthropic/claude-sonnet-4",
+        "openrouter:anthropic/claude-sonnet-4.5"
+      ],
+      "total_models": 36
+    },
+    "arcee-ai": {
+      "company_name": "Arcee AI",
+      "description": "Reasoning models - Virtuoso, Maestro, Spotlight",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:arcee-ai/coder-large",
+        "openrouter:arcee-ai/maestro-reasoning",
+        "openrouter:arcee-ai/spotlight",
+        "openrouter:arcee-ai/virtuoso-large"
+      ],
+      "total_models": 4
+    },
+    "arize-ai": {
+      "company_name": "Arize AI",
+      "description": "Qwen fine-tunes for evaluation",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:arize-ai/qwen-2-1.5b-instruct"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "arliai": {
+      "company_name": "Arli AI",
+      "description": "QwQ reasoning model variants",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:arliai/qwq-32b-arliai-rpr-v1"
+      ],
+      "total_models": 1
+    },
+    "baai": {
+      "company_name": "Beijing Academy of AI",
+      "description": "BGE embedding models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:BAAI/bge-base-en-v1.5",
+        "togetherai:BAAI/bge-large-en-v1.5"
+      ],
+      "openrouter": [],
+      "total_models": 2
+    },
+    "baidu": {
+      "company_name": "Baidu",
+      "description": "ERNIE Bot family",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:baidu/ernie-4.5-21b-a3b",
+        "openrouter:baidu/ernie-4.5-21b-a3b-thinking",
+        "openrouter:baidu/ernie-4.5-300b-a47b",
+        "openrouter:baidu/ernie-4.5-vl-28b-a3b",
+        "openrouter:baidu/ernie-4.5-vl-424b-a47b"
+      ],
+      "total_models": 5
+    },
+    "black-forest-labs": {
+      "company_name": "Black Forest Labs",
+      "description": "FLUX image generation models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:black-forest-labs/FLUX.1-dev",
+        "togetherai:black-forest-labs/FLUX.1-dev-lora",
+        "togetherai:black-forest-labs/FLUX.1-kontext-dev",
+        "togetherai:black-forest-labs/FLUX.1-kontext-max",
+        "togetherai:black-forest-labs/FLUX.1-kontext-pro",
+        "togetherai:black-forest-labs/FLUX.1-krea-dev",
+        "togetherai:black-forest-labs/FLUX.1-pro",
+        "togetherai:black-forest-labs/FLUX.1-schnell",
+        "togetherai:black-forest-labs/FLUX.1-schnell-Free",
+        "togetherai:black-forest-labs/FLUX.1.1-pro",
+        "togetherai:black-forest-labs/FLUX.2-dev",
+        "togetherai:black-forest-labs/FLUX.2-flex",
+        "togetherai:black-forest-labs/FLUX.2-pro"
+      ],
+      "openrouter": [],
+      "total_models": 13
+    },
+    "bytedance": {
+      "company_name": "ByteDance",
+      "description": "Seedance language models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:ByteDance/Seedance-1.0-lite",
+        "togetherai:ByteDance/Seedance-1.0-pro"
+      ],
+      "openrouter": [
+        "openrouter:bytedance/ui-tars-1.5-7b"
+      ],
+      "total_models": 3
+    },
+    "bytedance-seed": {
+      "company_name": "ByteDance Seed",
+      "description": "Seedream video generation models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:ByteDance-Seed/Seedream-3.0",
+        "togetherai:ByteDance-Seed/Seedream-4.0"
+      ],
+      "openrouter": [],
+      "total_models": 2
+    },
+    "canopylabs": {
+      "company_name": "Canopy Labs",
+      "description": "Orpheus small models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:canopylabs/orpheus-3b-0.1-ft"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "cartesia": {
+      "company_name": "Cartesia",
+      "description": "Sonic audio generation models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:cartesia/sonic",
+        "togetherai:cartesia/sonic-2"
+      ],
+      "openrouter": [],
+      "total_models": 2
+    },
+    "cognitivecomputations": {
+      "company_name": "Cognitive Computations",
+      "description": "Dolphin fine-tunes",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
+      ],
+      "total_models": 1
+    },
+    "cohere": {
+      "company_name": "Cohere",
+      "description": "Command chat, Embed, Rerank",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:cohere/command-a",
+        "openrouter:cohere/command-r-08-2024",
+        "openrouter:cohere/command-r-plus-08-2024",
+        "openrouter:cohere/command-r7b-12-2024"
+      ],
+      "total_models": 4
+    },
+    "deepcogito": {
+      "company_name": "DeepCogito",
+      "description": "Cogito reasoning models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:deepcogito/cogito-v2-preview-llama-109B-MoE",
+        "togetherai:deepcogito/cogito-v2-preview-llama-405B",
+        "togetherai:deepcogito/cogito-v2-preview-llama-70B"
+      ],
+      "openrouter": [
+        "openrouter:deepcogito/cogito-v2-preview-deepseek-671b",
+        "openrouter:deepcogito/cogito-v2-preview-llama-109b-moe",
+        "openrouter:deepcogito/cogito-v2-preview-llama-405b",
+        "openrouter:deepcogito/cogito-v2-preview-llama-70b",
+        "openrouter:deepcogito/cogito-v2.1-671b"
+      ],
+      "total_models": 8
+    },
+    "deepseek": {
+      "company_name": "DeepSeek",
+      "description": "DeepSeek-V3, R1 reasoning, Coder, VL",
+      "direct_api": [
+        "deepseek-chat",
+        "deepseek-reasoner"
+      ],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:deepseek/deepseek-chat",
+        "openrouter:deepseek/deepseek-chat-v3-0324",
+        "openrouter:deepseek/deepseek-chat-v3.1",
+        "openrouter:deepseek/deepseek-prover-v2",
+        "openrouter:deepseek/deepseek-r1",
+        "openrouter:deepseek/deepseek-r1-0528",
+        "openrouter:deepseek/deepseek-r1-0528-qwen3-8b",
+        "openrouter:deepseek/deepseek-r1-distill-llama-70b",
+        "openrouter:deepseek/deepseek-r1-distill-llama-70b:free",
+        "openrouter:deepseek/deepseek-r1-distill-qwen-14b",
+        "openrouter:deepseek/deepseek-r1-distill-qwen-32b",
+        "openrouter:deepseek/deepseek-v3.1-terminus",
+        "openrouter:deepseek/deepseek-v3.1-terminus:exacto",
+        "openrouter:deepseek/deepseek-v3.2-exp"
+      ],
+      "total_models": 16
+    },
+    "deepseek-ai": {
+      "company_name": "DeepSeek AI",
+      "description": "Official DeepSeek models on TogetherAI",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:deepseek-ai/DeepSeek-R1",
+        "togetherai:deepseek-ai/DeepSeek-R1-0528-tput",
+        "togetherai:deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+        "togetherai:deepseek-ai/DeepSeek-V3",
+        "togetherai:deepseek-ai/DeepSeek-V3.1"
+      ],
+      "openrouter": [],
+      "total_models": 5
+    },
+    "eleutherai": {
+      "company_name": "EleutherAI",
+      "description": "Llemma math models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:eleutherai/llemma_7b"
+      ],
+      "total_models": 1
+    },
+    "google": {
+      "company_name": "Google DeepMind",
+      "description": "Gemini, Gemma, Imagen, Veo",
+      "direct_api": [
+        "gemini-1.5-flash",
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-2.5-pro",
+        "gemini-3-pro-preview"
+      ],
+      "togetherai": [
+        "togetherai:google/flash-image-2.5",
+        "togetherai:google/gemini-3-pro-image",
+        "togetherai:google/gemma-3n-E4B-it",
+        "togetherai:google/imagen-4.0-fast",
+        "togetherai:google/imagen-4.0-preview",
+        "togetherai:google/imagen-4.0-ultra",
+        "togetherai:google/veo-2.0",
+        "togetherai:google/veo-3.0",
+        "togetherai:google/veo-3.0-audio",
+        "togetherai:google/veo-3.0-fast",
+        "togetherai:google/veo-3.0-fast-audio"
+      ],
+      "openrouter": [
+        "openrouter:google/gemini-2.0-flash-001",
+        "openrouter:google/gemini-2.0-flash-exp:free",
+        "openrouter:google/gemini-2.0-flash-lite-001",
+        "openrouter:google/gemini-2.5-flash",
+        "openrouter:google/gemini-2.5-flash-image",
+        "openrouter:google/gemini-2.5-flash-image-preview",
+        "openrouter:google/gemini-2.5-flash-lite",
+        "openrouter:google/gemini-2.5-flash-lite-preview-09-2025",
+        "openrouter:google/gemini-2.5-flash-preview-09-2025",
+        "openrouter:google/gemini-2.5-pro",
+        "openrouter:google/gemini-2.5-pro-preview",
+        "openrouter:google/gemini-2.5-pro-preview-05-06",
+        "openrouter:google/gemini-3-pro-image-preview",
+        "openrouter:google/gemini-3-pro-preview",
+        "openrouter:google/gemma-2-27b-it",
+        "openrouter:google/gemma-2-9b-it",
+        "openrouter:google/gemma-3-12b-it",
+        "openrouter:google/gemma-3-12b-it:free",
+        "openrouter:google/gemma-3-27b-it",
+        "openrouter:google/gemma-3-27b-it:free",
+        "openrouter:google/gemma-3-4b-it",
+        "openrouter:google/gemma-3-4b-it:free",
+        "openrouter:google/gemma-3n-e2b-it:free",
+        "openrouter:google/gemma-3n-e4b-it",
+        "openrouter:google/gemma-3n-e4b-it:free"
+      ],
+      "total_models": 43
+    },
+    "gryphe": {
+      "company_name": "Gryphe",
+      "description": "MythoMax community fine-tune",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:gryphe/mythomax-l2-13b"
+      ],
+      "total_models": 1
+    },
+    "hexgrad": {
+      "company_name": "Hexgrad",
+      "description": "Kokoro TTS model",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:hexgrad/Kokoro-82M"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "hidream-ai": {
+      "company_name": "HiDream AI",
+      "description": "Image generation models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:HiDream-ai/HiDream-I1-Dev",
+        "togetherai:HiDream-ai/HiDream-I1-Fast",
+        "togetherai:HiDream-ai/HiDream-I1-Full"
+      ],
+      "openrouter": [],
+      "total_models": 3
+    },
+    "ibm-granite": {
+      "company_name": "IBM",
+      "description": "Granite enterprise models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:ibm-granite/granite-4.0-h-micro"
+      ],
+      "total_models": 1
+    },
+    "ideogram": {
+      "company_name": "Ideogram",
+      "description": "Text-to-image generation",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:ideogram/ideogram-3.0"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "inception": {
+      "company_name": "Inception AI",
+      "description": "Mercury coding models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:inception/mercury",
+        "openrouter:inception/mercury-coder"
+      ],
+      "total_models": 2
+    },
+    "inflection": {
+      "company_name": "Inflection AI",
+      "description": "Pi assistant models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:inflection/inflection-3-pi",
+        "openrouter:inflection/inflection-3-productivity"
+      ],
+      "total_models": 2
+    },
+    "intfloat": {
+      "company_name": "IntFloat",
+      "description": "E5 multilingual embeddings",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:intfloat/multilingual-e5-large-instruct"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "keith-aditya": {
+      "company_name": "Keith Aditya",
+      "description": "Kimi K2 fine-tune",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:keith-aditya/kimi-k2-instruct"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "kwaipilot": {
+      "company_name": "Kuaishou KwaiPilot",
+      "description": "Chinese coding assistant",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:kwaipilot/kat-coder-pro:free"
+      ],
+      "total_models": 1
+    },
+    "kwaivgi": {
+      "company_name": "Kuaishou VGI",
+      "description": "Kling video generation models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:kwaivgI/kling-1.6-pro",
+        "togetherai:kwaivgI/kling-1.6-standard",
+        "togetherai:kwaivgI/kling-2.0-master",
+        "togetherai:kwaivgI/kling-2.1-master",
+        "togetherai:kwaivgI/kling-2.1-pro",
+        "togetherai:kwaivgI/kling-2.1-standard"
+      ],
+      "openrouter": [],
+      "total_models": 6
+    },
+    "liquid": {
+      "company_name": "Liquid AI",
+      "description": "Liquid Foundation Models (LFMs)",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:liquid/lfm-2.2-6b",
+        "openrouter:liquid/lfm2-8b-a1b"
+      ],
+      "total_models": 2
+    },
+    "lykon": {
+      "company_name": "Lykon",
+      "description": "DreamShaper image generation",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:Lykon/DreamShaper"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "mancer": {
+      "company_name": "Mancer",
+      "description": "Weaver RP model",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:mancer/weaver"
+      ],
+      "total_models": 1
+    },
+    "marin-community": {
+      "company_name": "Marin Community",
+      "description": "Marin fine-tune",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:marin-community/marin-8b-instruct"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "meituan": {
+      "company_name": "Meituan",
+      "description": "Chinese tech company models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:meituan/longcat-flash-chat",
+        "openrouter:meituan/longcat-flash-chat:free"
+      ],
+      "total_models": 2
+    },
+    "mercor": {
+      "company_name": "Mercor",
+      "description": "CWM coding models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:mercor/cwm"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "meta-llama": {
+      "company_name": "Meta AI",
+      "description": "Llama family including Code Llama, Guard",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:Meta-Llama/Llama-Guard-7b",
+        "togetherai:meta-llama/Llama-3-70b-chat-hf",
+        "togetherai:meta-llama/Llama-3-70b-hf",
+        "togetherai:meta-llama/Llama-3.1-405B-Instruct",
+        "togetherai:meta-llama/Llama-3.2-1B-Instruct",
+        "togetherai:meta-llama/Llama-3.2-3B-Instruct-Turbo",
+        "togetherai:meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "togetherai:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+        "togetherai:meta-llama/Llama-4-Scout-17B-16E-Instruct",
+        "togetherai:meta-llama/Llama-Guard-3-11B-Vision-Turbo",
+        "togetherai:meta-llama/Llama-Guard-4-12B",
+        "togetherai:meta-llama/LlamaGuard-2-8b",
+        "togetherai:meta-llama/Meta-Llama-3-70B-Instruct-Turbo",
+        "togetherai:meta-llama/Meta-Llama-3-8B-Instruct",
+        "togetherai:meta-llama/Meta-Llama-3-8B-Instruct-Lite",
+        "togetherai:meta-llama/Meta-Llama-3.1-405B-Instruct-Lite-Pro",
+        "togetherai:meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
+        "togetherai:meta-llama/Meta-Llama-3.1-70B-Instruct-Reference",
+        "togetherai:meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+        "togetherai:meta-llama/Meta-Llama-3.1-8B-Instruct-Reference",
+        "togetherai:meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+        "togetherai:meta-llama/Meta-Llama-Guard-3-8B"
+      ],
+      "openrouter": [
+        "openrouter:meta-llama/llama-3-70b-instruct",
+        "openrouter:meta-llama/llama-3-8b-instruct",
+        "openrouter:meta-llama/llama-3.1-405b",
+        "openrouter:meta-llama/llama-3.1-405b-instruct",
+        "openrouter:meta-llama/llama-3.1-70b-instruct",
+        "openrouter:meta-llama/llama-3.1-8b-instruct",
+        "openrouter:meta-llama/llama-3.2-11b-vision-instruct",
+        "openrouter:meta-llama/llama-3.2-1b-instruct",
+        "openrouter:meta-llama/llama-3.2-3b-instruct",
+        "openrouter:meta-llama/llama-3.2-3b-instruct:free",
+        "openrouter:meta-llama/llama-3.2-90b-vision-instruct",
+        "openrouter:meta-llama/llama-3.3-70b-instruct",
+        "openrouter:meta-llama/llama-3.3-70b-instruct:free",
+        "openrouter:meta-llama/llama-4-maverick",
+        "openrouter:meta-llama/llama-4-scout",
+        "openrouter:meta-llama/llama-guard-2-8b",
+        "openrouter:meta-llama/llama-guard-3-8b",
+        "openrouter:meta-llama/llama-guard-4-12b"
+      ],
+      "total_models": 40
+    },
+    "microsoft": {
+      "company_name": "Microsoft",
+      "description": "Phi small models, MAI reasoning",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:microsoft/mai-ds-r1",
+        "openrouter:microsoft/phi-3-medium-128k-instruct",
+        "openrouter:microsoft/phi-3-mini-128k-instruct",
+        "openrouter:microsoft/phi-3.5-mini-128k-instruct",
+        "openrouter:microsoft/phi-4",
+        "openrouter:microsoft/phi-4-multimodal-instruct",
+        "openrouter:microsoft/phi-4-reasoning-plus",
+        "openrouter:microsoft/wizardlm-2-8x22b"
+      ],
+      "total_models": 8
+    },
+    "minimax": {
+      "company_name": "MiniMax",
+      "description": "Video and language models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:minimax/hailuo-02",
+        "togetherai:minimax/video-01-director"
+      ],
+      "openrouter": [
+        "openrouter:minimax/minimax-01",
+        "openrouter:minimax/minimax-m1",
+        "openrouter:minimax/minimax-m2"
+      ],
+      "total_models": 5
+    },
+    "mistral": {
+      "company_name": "Mistral AI",
+      "description": "Direct API access to Mistral models",
+      "direct_api": [
+        "codestral-2508",
+        "codestral-latest",
+        "devstral-small-2507",
+        "devstral-small-latest",
+        "magistral-medium-2509",
+        "magistral-medium-latest",
+        "magistral-small-2509",
+        "magistral-small-latest",
+        "ministral-3b-2410",
+        "ministral-3b-latest",
+        "ministral-8b-2410",
+        "ministral-8b-latest",
+        "mistral-large-latest",
+        "mistral-large-pixtral-2411",
+        "mistral-medium",
+        "mistral-medium-2508",
+        "mistral-medium-latest",
+        "mistral-moderation-2411",
+        "mistral-moderation-latest",
+        "mistral-ocr-2505",
+        "mistral-ocr-latest",
+        "mistral-small-2506",
+        "mistral-small-latest",
+        "mistral-tiny",
+        "mistral-tiny-2312",
+        "mistral-tiny-2407",
+        "mistral-tiny-latest",
+        "open-mistral-7b",
+        "open-mistral-nemo",
+        "open-mistral-nemo-2407",
+        "pixtral-12b",
+        "pixtral-12b-2409",
+        "pixtral-12b-latest",
+        "pixtral-large-2411",
+        "pixtral-large-latest"
+      ],
+      "togetherai": [],
+      "openrouter": [],
+      "total_models": 35
+    },
+    "mistralai": {
+      "company_name": "Mistral AI",
+      "description": "Mistral, Mixtral, Codestral, Pixtral families",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:mistralai/Mistral-7B-Instruct-v0.2",
+        "togetherai:mistralai/Mistral-7B-Instruct-v0.3",
+        "togetherai:mistralai/Mistral-Small-24B-Instruct-2501",
+        "togetherai:mistralai/Mixtral-8x7B-Instruct-v0.1"
+      ],
+      "openrouter": [
+        "openrouter:mistralai/codestral-2501",
+        "openrouter:mistralai/codestral-2508",
+        "openrouter:mistralai/devstral-medium",
+        "openrouter:mistralai/devstral-small",
+        "openrouter:mistralai/devstral-small-2505",
+        "openrouter:mistralai/magistral-medium-2506",
+        "openrouter:mistralai/magistral-medium-2506:thinking",
+        "openrouter:mistralai/magistral-small-2506",
+        "openrouter:mistralai/ministral-3b",
+        "openrouter:mistralai/ministral-8b",
+        "openrouter:mistralai/mistral-7b-instruct",
+        "openrouter:mistralai/mistral-7b-instruct-v0.1",
+        "openrouter:mistralai/mistral-7b-instruct-v0.2",
+        "openrouter:mistralai/mistral-7b-instruct-v0.3",
+        "openrouter:mistralai/mistral-7b-instruct:free",
+        "openrouter:mistralai/mistral-large",
+        "openrouter:mistralai/mistral-large-2407",
+        "openrouter:mistralai/mistral-large-2411",
+        "openrouter:mistralai/mistral-medium-3",
+        "openrouter:mistralai/mistral-medium-3.1",
+        "openrouter:mistralai/mistral-nemo",
+        "openrouter:mistralai/mistral-saba",
+        "openrouter:mistralai/mistral-small",
+        "openrouter:mistralai/mistral-small-24b-instruct-2501",
+        "openrouter:mistralai/mistral-small-3.1-24b-instruct",
+        "openrouter:mistralai/mistral-small-3.1-24b-instruct:free",
+        "openrouter:mistralai/mistral-small-3.2-24b-instruct",
+        "openrouter:mistralai/mistral-tiny",
+        "openrouter:mistralai/mixtral-8x22b-instruct",
+        "openrouter:mistralai/mixtral-8x7b-instruct",
+        "openrouter:mistralai/pixtral-12b",
+        "openrouter:mistralai/pixtral-large-2411",
+        "openrouter:mistralai/voxtral-small-24b-2507"
+      ],
+      "total_models": 37
+    },
+    "mixedbread-ai": {
+      "company_name": "Mixedbread AI",
+      "description": "Mxbai reranking models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:mixedbread-ai/Mxbai-Rerank-Large-V2"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "moonshotai": {
+      "company_name": "Moonshot AI",
+      "description": "Kimi long-context models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:moonshotai/Kimi-K2-Instruct-0905",
+        "togetherai:moonshotai/Kimi-K2-Thinking"
+      ],
+      "openrouter": [
+        "openrouter:moonshotai/kimi-dev-72b",
+        "openrouter:moonshotai/kimi-k2",
+        "openrouter:moonshotai/kimi-k2-0905",
+        "openrouter:moonshotai/kimi-k2-0905:exacto",
+        "openrouter:moonshotai/kimi-k2-thinking",
+        "openrouter:moonshotai/kimi-k2:free",
+        "openrouter:moonshotai/kimi-linear-48b-a3b-instruct"
+      ],
+      "total_models": 9
+    },
+    "morph": {
+      "company_name": "Morph Labs",
+      "description": "Morph model variants",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:morph/morph-v3-fast",
+        "openrouter:morph/morph-v3-large"
+      ],
+      "total_models": 2
+    },
+    "neversleep": {
+      "company_name": "Neversleep",
+      "description": "Noromaid and Lumimaid RP models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:neversleep/llama-3.1-lumimaid-8b",
+        "openrouter:neversleep/noromaid-20b"
+      ],
+      "total_models": 2
+    },
+    "nousresearch": {
+      "company_name": "Nous Research",
+      "description": "Hermes fine-tuned models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:nousresearch/deephermes-3-mistral-24b-preview",
+        "openrouter:nousresearch/hermes-2-pro-llama-3-8b",
+        "openrouter:nousresearch/hermes-3-llama-3.1-405b",
+        "openrouter:nousresearch/hermes-3-llama-3.1-405b:free",
+        "openrouter:nousresearch/hermes-3-llama-3.1-70b",
+        "openrouter:nousresearch/hermes-4-405b",
+        "openrouter:nousresearch/hermes-4-70b"
+      ],
+      "total_models": 7
+    },
+    "nvidia": {
+      "company_name": "NVIDIA",
+      "description": "Nemotron enterprise models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:nvidia/NVIDIA-Nemotron-Nano-9B-v2"
+      ],
+      "openrouter": [
+        "openrouter:nvidia/llama-3.1-nemotron-70b-instruct",
+        "openrouter:nvidia/llama-3.1-nemotron-ultra-253b-v1",
+        "openrouter:nvidia/llama-3.3-nemotron-super-49b-v1.5",
+        "openrouter:nvidia/nemotron-nano-12b-v2-vl",
+        "openrouter:nvidia/nemotron-nano-12b-v2-vl:free",
+        "openrouter:nvidia/nemotron-nano-9b-v2",
+        "openrouter:nvidia/nemotron-nano-9b-v2:free"
+      ],
+      "total_models": 8
+    },
+    "openai": {
+      "company_name": "OpenAI",
+      "description": "GPT, O-series, DALL-E, Whisper, Sora",
+      "direct_api": [
+        "gpt-4.1",
+        "gpt-4.1-mini",
+        "gpt-4.1-nano",
+        "gpt-4.5-preview",
+        "gpt-4o",
+        "gpt-4o-mini",
+        "gpt-5",
+        "gpt-5-2025-08-07",
+        "gpt-5-chat-latest",
+        "gpt-5-mini",
+        "gpt-5-mini-2025-08-07",
+        "gpt-5-nano",
+        "gpt-5-nano-2025-08-07",
+        "gpt-5.1",
+        "gpt-5.1-chat-latest",
+        "gpt-5.1-codex",
+        "gpt-5.1-codex-mini",
+        "o1",
+        "o1-mini",
+        "o1-pro",
+        "o3",
+        "o3-mini",
+        "o4-mini"
+      ],
+      "togetherai": [
+        "togetherai:openai/gpt-oss-120b",
+        "togetherai:openai/gpt-oss-20b",
+        "togetherai:openai/sora-2",
+        "togetherai:openai/sora-2-pro",
+        "togetherai:openai/whisper-large-v3"
+      ],
+      "openrouter": [
+        "openrouter:openai/chatgpt-4o-latest",
+        "openrouter:openai/codex-mini",
+        "openrouter:openai/gpt-3.5-turbo",
+        "openrouter:openai/gpt-3.5-turbo-0613",
+        "openrouter:openai/gpt-3.5-turbo-16k",
+        "openrouter:openai/gpt-3.5-turbo-instruct",
+        "openrouter:openai/gpt-4",
+        "openrouter:openai/gpt-4-0314",
+        "openrouter:openai/gpt-4-1106-preview",
+        "openrouter:openai/gpt-4-turbo",
+        "openrouter:openai/gpt-4-turbo-preview",
+        "openrouter:openai/gpt-4.1",
+        "openrouter:openai/gpt-4.1-mini",
+        "openrouter:openai/gpt-4.1-nano",
+        "openrouter:openai/gpt-4o",
+        "openrouter:openai/gpt-4o-2024-05-13",
+        "openrouter:openai/gpt-4o-2024-08-06",
+        "openrouter:openai/gpt-4o-2024-11-20",
+        "openrouter:openai/gpt-4o-audio-preview",
+        "openrouter:openai/gpt-4o-mini",
+        "openrouter:openai/gpt-4o-mini-2024-07-18",
+        "openrouter:openai/gpt-4o-mini-search-preview",
+        "openrouter:openai/gpt-4o-search-preview",
+        "openrouter:openai/gpt-4o:extended",
+        "openrouter:openai/gpt-5",
+        "openrouter:openai/gpt-5-chat",
+        "openrouter:openai/gpt-5-codex",
+        "openrouter:openai/gpt-5-image",
+        "openrouter:openai/gpt-5-image-mini",
+        "openrouter:openai/gpt-5-mini",
+        "openrouter:openai/gpt-5-nano",
+        "openrouter:openai/gpt-5-pro",
+        "openrouter:openai/gpt-5.1",
+        "openrouter:openai/gpt-5.1-chat",
+        "openrouter:openai/gpt-5.1-codex",
+        "openrouter:openai/gpt-5.1-codex-mini",
+        "openrouter:openai/gpt-oss-120b",
+        "openrouter:openai/gpt-oss-120b:exacto",
+        "openrouter:openai/gpt-oss-20b",
+        "openrouter:openai/gpt-oss-20b:free",
+        "openrouter:openai/gpt-oss-safeguard-20b",
+        "openrouter:openai/o1",
+        "openrouter:openai/o1-pro",
+        "openrouter:openai/o3",
+        "openrouter:openai/o3-deep-research",
+        "openrouter:openai/o3-mini",
+        "openrouter:openai/o3-mini-high",
+        "openrouter:openai/o3-pro",
+        "openrouter:openai/o4-mini",
+        "openrouter:openai/o4-mini-deep-research",
+        "openrouter:openai/o4-mini-high"
+      ],
+      "total_models": 79
+    },
+    "opengvlab": {
+      "company_name": "OpenGVLab",
+      "description": "InternVL vision models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:opengvlab/internvl3-78b"
+      ],
+      "total_models": 1
+    },
+    "openrouter": {
+      "company_name": "OpenRouter",
+      "description": "Auto-routing and utility models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:openrouter/auto",
+        "openrouter:openrouter/bert-nebulon-alpha"
+      ],
+      "total_models": 2
+    },
+    "pangram": {
+      "company_name": "Pangram Labs",
+      "description": "Mistral Small fine-tune",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:pangram/mistral-small-2501"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "perplexity": {
+      "company_name": "Perplexity AI",
+      "description": "Sonar search and reasoning models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:perplexity/sonar",
+        "openrouter:perplexity/sonar-deep-research",
+        "openrouter:perplexity/sonar-pro",
+        "openrouter:perplexity/sonar-pro-search",
+        "openrouter:perplexity/sonar-reasoning",
+        "openrouter:perplexity/sonar-reasoning-pro"
+      ],
+      "total_models": 6
+    },
+    "pixverse": {
+      "company_name": "Pixverse",
+      "description": "Video generation models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:pixverse/pixverse-v5"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "qwen": {
+      "company_name": "Alibaba Qwen Team",
+      "description": "Qwen, QwQ, QVQ, Coder families",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:Qwen/Qwen-Image",
+        "togetherai:Qwen/Qwen2.5-14B-Instruct",
+        "togetherai:Qwen/Qwen2.5-72B-Instruct",
+        "togetherai:Qwen/Qwen2.5-72B-Instruct-Turbo",
+        "togetherai:Qwen/Qwen2.5-7B-Instruct-Turbo",
+        "togetherai:Qwen/Qwen2.5-VL-72B-Instruct",
+        "togetherai:Qwen/Qwen3-235B-A22B-Instruct-2507-tput",
+        "togetherai:Qwen/Qwen3-235B-A22B-Thinking-2507",
+        "togetherai:Qwen/Qwen3-235B-A22B-fp8-tput",
+        "togetherai:Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8",
+        "togetherai:Qwen/Qwen3-Next-80B-A3B-Instruct",
+        "togetherai:Qwen/Qwen3-Next-80B-A3B-Thinking"
+      ],
+      "openrouter": [
+        "openrouter:qwen/qwen-2.5-72b-instruct",
+        "openrouter:qwen/qwen-2.5-7b-instruct",
+        "openrouter:qwen/qwen-2.5-coder-32b-instruct",
+        "openrouter:qwen/qwen-2.5-vl-7b-instruct",
+        "openrouter:qwen/qwen-max",
+        "openrouter:qwen/qwen-plus",
+        "openrouter:qwen/qwen-plus-2025-07-28",
+        "openrouter:qwen/qwen-plus-2025-07-28:thinking",
+        "openrouter:qwen/qwen-turbo",
+        "openrouter:qwen/qwen-vl-max",
+        "openrouter:qwen/qwen-vl-plus",
+        "openrouter:qwen/qwen2.5-coder-7b-instruct",
+        "openrouter:qwen/qwen2.5-vl-32b-instruct",
+        "openrouter:qwen/qwen2.5-vl-72b-instruct",
+        "openrouter:qwen/qwen3-14b",
+        "openrouter:qwen/qwen3-235b-a22b",
+        "openrouter:qwen/qwen3-235b-a22b-2507",
+        "openrouter:qwen/qwen3-235b-a22b-thinking-2507",
+        "openrouter:qwen/qwen3-235b-a22b:free",
+        "openrouter:qwen/qwen3-30b-a3b",
+        "openrouter:qwen/qwen3-30b-a3b-instruct-2507",
+        "openrouter:qwen/qwen3-30b-a3b-thinking-2507",
+        "openrouter:qwen/qwen3-32b",
+        "openrouter:qwen/qwen3-4b:free",
+        "openrouter:qwen/qwen3-8b",
+        "openrouter:qwen/qwen3-coder",
+        "openrouter:qwen/qwen3-coder-30b-a3b-instruct",
+        "openrouter:qwen/qwen3-coder-flash",
+        "openrouter:qwen/qwen3-coder-plus",
+        "openrouter:qwen/qwen3-coder:exacto",
+        "openrouter:qwen/qwen3-coder:free",
+        "openrouter:qwen/qwen3-max",
+        "openrouter:qwen/qwen3-next-80b-a3b-instruct",
+        "openrouter:qwen/qwen3-next-80b-a3b-thinking",
+        "openrouter:qwen/qwen3-vl-235b-a22b-instruct",
+        "openrouter:qwen/qwen3-vl-235b-a22b-thinking",
+        "openrouter:qwen/qwen3-vl-30b-a3b-instruct",
+        "openrouter:qwen/qwen3-vl-30b-a3b-thinking",
+        "openrouter:qwen/qwen3-vl-8b-instruct",
+        "openrouter:qwen/qwen3-vl-8b-thinking",
+        "openrouter:qwen/qwq-32b"
+      ],
+      "total_models": 53
+    },
+    "raifle": {
+      "company_name": "Raifle",
+      "description": "SorcererLM MoE model",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:raifle/sorcererlm-8x22b"
+      ],
+      "total_models": 1
+    },
+    "relace": {
+      "company_name": "Relace AI",
+      "description": "Community fine-tunes",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:relace/relace-apply-3"
+      ],
+      "total_models": 1
+    },
+    "rundiffusion": {
+      "company_name": "RunDiffusion",
+      "description": "Juggernaut image models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:RunDiffusion/Juggernaut-pro-flux",
+        "togetherai:Rundiffusion/Juggernaut-Lightning-Flux"
+      ],
+      "openrouter": [],
+      "total_models": 2
+    },
+    "salesforce": {
+      "company_name": "Salesforce",
+      "description": "Llama Rank reranking",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:Salesforce/Llama-Rank-V1"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "sao10k": {
+      "company_name": "Sao10K",
+      "description": "Euryale and Lunaris RP models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:sao10k/l3-euryale-70b",
+        "openrouter:sao10k/l3-lunaris-8b",
+        "openrouter:sao10k/l3.1-70b-hanami-x1",
+        "openrouter:sao10k/l3.1-euryale-70b",
+        "openrouter:sao10k/l3.3-euryale-70b"
+      ],
+      "total_models": 5
+    },
+    "scb10x": {
+      "company_name": "SCB 10X",
+      "description": "Typhoon Thai language models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:scb10x/scb10x-typhoon-2-1-gemma3-12b"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "servicenow-ai": {
+      "company_name": "ServiceNow",
+      "description": "Apriel reasoning models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:ServiceNow-AI/Apriel-1.5-15b-Thinker"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "stabilityai": {
+      "company_name": "Stability AI",
+      "description": "Stable Diffusion models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:stabilityai/stable-diffusion-3-medium",
+        "togetherai:stabilityai/stable-diffusion-xl-base-1.0"
+      ],
+      "openrouter": [],
+      "total_models": 2
+    },
+    "stepfun-ai": {
+      "company_name": "StepFun",
+      "description": "Step series models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:stepfun-ai/step3"
+      ],
+      "total_models": 1
+    },
+    "switchpoint": {
+      "company_name": "SwitchPoint",
+      "description": "Gemini fine-tunes",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:switchpoint/router"
+      ],
+      "total_models": 1
+    },
+    "tencent": {
+      "company_name": "Tencent",
+      "description": "Hunyuan models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:tencent/hunyuan-a13b-instruct"
+      ],
+      "total_models": 1
+    },
+    "thedrummer": {
+      "company_name": "TheDrummer",
+      "description": "Community fine-tunes",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:thedrummer/anubis-70b-v1.1",
+        "openrouter:thedrummer/cydonia-24b-v4.1",
+        "openrouter:thedrummer/rocinante-12b",
+        "openrouter:thedrummer/skyfall-36b-v2",
+        "openrouter:thedrummer/unslopnemo-12b"
+      ],
+      "total_models": 5
+    },
+    "thudm": {
+      "company_name": "Tsinghua KEG (Zhipu AI)",
+      "description": "GLM models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:thudm/glm-4.1v-9b-thinking"
+      ],
+      "total_models": 1
+    },
+    "tngtech": {
+      "company_name": "TNG Technology Consulting",
+      "description": "DeepSeek chimera experiments",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:tngtech/deepseek-r1t-chimera",
+        "openrouter:tngtech/deepseek-r1t-chimera:free",
+        "openrouter:tngtech/deepseek-r1t2-chimera",
+        "openrouter:tngtech/deepseek-r1t2-chimera:free",
+        "openrouter:tngtech/tng-r1t-chimera",
+        "openrouter:tngtech/tng-r1t-chimera:free"
+      ],
+      "total_models": 6
+    },
+    "togethercomputer": {
+      "company_name": "Together AI",
+      "description": "MoA, Refuel utility models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:togethercomputer/MoA-1",
+        "togetherai:togethercomputer/MoA-1-Turbo",
+        "togetherai:togethercomputer/Refuel-Llm-V2",
+        "togetherai:togethercomputer/Refuel-Llm-V2-Small",
+        "togetherai:togethercomputer/m2-bert-80M-32k-retrieval"
+      ],
+      "openrouter": [],
+      "total_models": 5
+    },
+    "undi95": {
+      "company_name": "Undi95",
+      "description": "ReMM community fine-tune",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:undi95/remm-slerp-l2-13b"
+      ],
+      "total_models": 1
+    },
+    "vidu": {
+      "company_name": "Vidu AI",
+      "description": "Video generation models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:vidu/vidu-2.0",
+        "togetherai:vidu/vidu-q1"
+      ],
+      "openrouter": [],
+      "total_models": 2
+    },
+    "virtue-ai": {
+      "company_name": "Virtue AI",
+      "description": "Content moderation models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:Virtue-AI/VirtueGuard-Text-Lite"
+      ],
+      "openrouter": [],
+      "total_models": 1
+    },
+    "wan-ai": {
+      "company_name": "Wan AI",
+      "description": "Text/image to video models",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:Wan-AI/Wan2.2-I2V-A14B",
+        "togetherai:Wan-AI/Wan2.2-T2V-A14B"
+      ],
+      "openrouter": [],
+      "total_models": 2
+    },
+    "x-ai": {
+      "company_name": "xAI",
+      "description": "Grok models via OpenRouter",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:x-ai/grok-3",
+        "openrouter:x-ai/grok-3-beta",
+        "openrouter:x-ai/grok-3-mini",
+        "openrouter:x-ai/grok-3-mini-beta",
+        "openrouter:x-ai/grok-4",
+        "openrouter:x-ai/grok-4-fast",
+        "openrouter:x-ai/grok-4.1-fast:free",
+        "openrouter:x-ai/grok-code-fast-1"
+      ],
+      "total_models": 8
+    },
+    "xai": {
+      "company_name": "xAI",
+      "description": "Grok models via Direct API",
+      "direct_api": [
+        "grok-2",
+        "grok-2-vision",
+        "grok-3",
+        "grok-3-fast",
+        "grok-3-mini",
+        "grok-3-mini-fast",
+        "grok-beta",
+        "grok-vision-beta"
+      ],
+      "togetherai": [],
+      "openrouter": [],
+      "total_models": 8
+    },
+    "z-ai": {
+      "company_name": "Zhipu AI",
+      "description": "GLM models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [
+        "openrouter:z-ai/glm-4-32b",
+        "openrouter:z-ai/glm-4.5",
+        "openrouter:z-ai/glm-4.5-air",
+        "openrouter:z-ai/glm-4.5-air:free",
+        "openrouter:z-ai/glm-4.5v",
+        "openrouter:z-ai/glm-4.6",
+        "openrouter:z-ai/glm-4.6:exacto"
+      ],
+      "total_models": 7
+    },
+    "zai-org": {
+      "company_name": "Zhipu AI",
+      "description": "GLM models on TogetherAI",
+      "direct_api": [],
+      "togetherai": [
+        "togetherai:zai-org/GLM-4.5-Air-FP8",
+        "togetherai:zai-org/GLM-4.6"
+      ],
+      "openrouter": [],
+      "total_models": 2
+    }
+  },
+  "company_patterns": {
+    "ai21": {
+      "patterns": [
+        "^jamba-",
+        "^j2-",
+        "^jurassic-",
+        "^ai21[./]"
+      ]
+    },
+    "aion-labs": {
+      "patterns": [
+        "^aion-",
+        "^aion-labs[./]"
+      ]
+    },
+    "alibaba": {
+      "patterns": [
+        "^qwen",
+        "^qwq",
+        "^qvq",
+        "^alibaba[./]"
+      ]
+    },
+    "allenai": {
+      "patterns": [
+        "^olmo-",
+        "^allenai[./]"
+      ]
+    },
+    "amazon": {
+      "patterns": [
+        "^amazon[./]nova",
+        "^nova-",
+        "^amazon[./]titan",
+        "^titan-"
+      ]
+    },
+    "anthropic": {
+      "patterns": [
+        "^claude-",
+        "^anthropic[./]"
+      ]
+    },
+    "arcee-ai": {
+      "patterns": [
+        "^arcee-",
+        "^virtuoso-",
+        "^maestro-",
+        "^spotlight-",
+        "^arcee-ai[./]"
+      ]
+    },
+    "baidu": {
+      "patterns": [
+        "^ernie-",
+        "^baidu[./]"
+      ]
+    },
+    "black-forest-labs": {
+      "patterns": [
+        "^flux",
+        "^black-forest-labs[./]"
+      ]
+    },
+    "bytedance": {
+      "patterns": [
+        "^seedance-",
+        "^bytedance[./]"
+      ]
+    },
+    "bytedance-seed": {
+      "patterns": [
+        "^seedream-",
+        "^bytedance-seed[./]"
+      ]
+    },
+    "cartesia": {
+      "patterns": [
+        "^sonic",
+        "^cartesia[./]"
+      ]
+    },
+    "cohere": {
+      "patterns": [
+        "^command-",
+        "^command$",
+        "^embed-",
+        "^rerank-",
+        "^aya-",
+        "^cohere[./]"
+      ]
+    },
+    "deepcogito": {
+      "patterns": [
+        "^cogito-",
+        "^deepcogito[./]"
+      ]
+    },
+    "deepseek": {
+      "patterns": [
+        "^deepseek-",
+        "^deepseek-ai[./]"
+      ]
+    },
+    "google": {
+      "patterns": [
+        "^gemini-",
+        "^gemma-",
+        "^palm-",
+        "^imagen-",
+        "^veo-",
+        "^bard",
+        "^google[./]"
+      ]
+    },
+    "hidream-ai": {
+      "patterns": [
+        "^hidream-",
+        "^hidream-ai[./]"
+      ]
+    },
+    "ideogram": {
+      "patterns": [
+        "^ideogram",
+        "^ideogram[./]"
+      ]
+    },
+    "inflection": {
+      "patterns": [
+        "^inflection-",
+        "^pi-"
+      ]
+    },
+    "kwaivgi": {
+      "patterns": [
+        "^kling-",
+        "^kwaivgi[./]"
+      ]
+    },
+    "liquid": {
+      "patterns": [
+        "^lfm-",
+        "^liquid[./]"
+      ]
+    },
+    "meta-llama": {
+      "patterns": [
+        "^llama-",
+        "^meta-llama[./]",
+        "^codellama"
+      ]
+    },
+    "microsoft": {
+      "patterns": [
+        "^phi-",
+        "^mai-",
+        "^wizardlm-",
+        "^microsoft[./]"
+      ]
+    },
+    "minimax": {
+      "patterns": [
+        "^minimax-",
+        "^hailuo-"
+      ]
+    },
+    "mistral": {
+      "patterns": [
+        "^mistral-",
+        "^mixtral-",
+        "^ministral-",
+        "^magistral-",
+        "^codestral",
+        "^devstral",
+        "^pixtral",
+        "^voxtral",
+        "^open-mistral",
+        "^mistralai[./]"
+      ]
+    },
+    "moonshotai": {
+      "patterns": [
+        "^kimi-",
+        "^moonshotai[./]"
+      ]
+    },
+    "nousresearch": {
+      "patterns": [
+        "^hermes-",
+        "^nous-",
+        "^deephermes-",
+        "^nousresearch[./]"
+      ]
+    },
+    "nvidia": {
+      "patterns": [
+        "^nemotron",
+        "^nvidia[./]"
+      ]
+    },
+    "openai": {
+      "patterns": [
+        "^gpt-",
+        "^o[1-4]-",
+        "^o[1-4]$",
+        "^chatgpt-",
+        "^dall-e-",
+        "^whisper-",
+        "^sora-",
+        "^codex",
+        "^openai[./]"
+      ]
+    },
+    "perplexity": {
+      "patterns": [
+        "^sonar-",
+        "^perplexity[./]"
+      ]
+    },
+    "pixverse": {
+      "patterns": [
+        "^pixverse"
+      ]
+    },
+    "qwen": {
+      "patterns": [
+        "^qwen",
+        "^qwq",
+        "^qvq",
+        "^Qwen[./]"
+      ]
+    },
+    "stabilityai": {
+      "patterns": [
+        "^stable-diffusion",
+        "^stabilityai[./]"
+      ]
+    },
+    "tngtech": {
+      "patterns": [
+        "^tng-",
+        "^tngtech[./]"
+      ]
+    },
+    "vidu": {
+      "patterns": [
+        "^vidu"
+      ]
+    },
+    "wan-ai": {
+      "patterns": [
+        "^wan-",
+        "^wan-ai[./]"
+      ]
+    },
+    "xai": {
+      "patterns": [
+        "^grok-",
+        "^x-ai[./]",
+        "^xai[./]"
+      ]
+    },
+    "zai-org": {
+      "patterns": [
+        "^glm-",
+        "^zai-org[./]",
+        "^z-ai[./]",
+        "^thudm[./]"
+      ]
+    }
+  },
+  "platform_prefixes": {
+    "togetherai": {
+      "prefix": "togetherai:",
+      "naming_convention": "organization/Model-Name (HuggingFace style, mixed case)",
+      "example": "togetherai:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+    },
+    "openrouter": {
+      "prefix": "openrouter:",
+      "naming_convention": "provider/model-name (lowercase, kebab-case)",
+      "example": "openrouter:anthropic/claude-sonnet-4.5",
+      "special_suffixes": {
+        ":free": "Free tier variant with rate limits",
+        ":nitro": "High-throughput variant",
+        ":floor": "Lowest price variant",
+        ":exacto": "Exact matching variant",
+        ":thinking": "Thinking/reasoning mode enabled",
+        ":extended": "Extended context window"
+      }
+    }
+  },
+  "usage_notes": {
+    "parseModelId_implementation": "\nfunction parseModelId(id) {\n  const OPENROUTER_PREFIX = 'openrouter:';\n  const TOGETHERAI_PREFIX = 'togetherai:';\n  \n  const result = {\n    id,\n    isOpenRouter: false,\n    isTogetherAI: false,\n    company: 'other',\n    name: id\n  };\n\n  // Check platform prefix\n  if (id.startsWith(OPENROUTER_PREFIX)) {\n    result.isOpenRouter = true;\n    const withoutPrefix = id.substring(OPENROUTER_PREFIX.length);\n    const parts = withoutPrefix.split('/');\n    result.company = parts[0];\n    result.name = parts.slice(1).join('/');\n  } else if (id.startsWith(TOGETHERAI_PREFIX)) {\n    result.isTogetherAI = true;\n    const withoutPrefix = id.substring(TOGETHERAI_PREFIX.length);\n    const parts = withoutPrefix.split('/');\n    result.company = parts[0];\n    result.name = parts.slice(1).join('/');\n  } else {\n    // Direct models - use model_registry lookup or pattern matching\n    // Check model_registry for exact match first\n    // Fall back to company_patterns regex matching\n  }\n  \n  return result;\n}\n",
+    "lookup_strategy": [
+      "1. Check if model has platform prefix (openrouter: or togetherai:)",
+      "2. If prefixed, extract company from path (e.g., 'anthropic' from 'openrouter:anthropic/claude-opus-4.5')",
+      "3. If Direct model (no prefix), lookup in model_registry by iterating companies",
+      "4. If not found in registry, use company_patterns regex matching",
+      "5. Return 'other' if no match found"
+    ]
+  }
+}

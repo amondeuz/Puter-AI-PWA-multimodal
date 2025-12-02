@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Deploy Puter PWA</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+    .form-group {
+      margin: 20px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #2196f3;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 16px;
+    }
+    button {
+      background: #2196f3;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    button:hover { background: #1976d2; }
+    #status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      display: none;
+    }
+    .success {
+      background: #1b5e20;
+      color: #4caf50;
+    }
+    .error {
+      background: #b71c1c;
+      color: #f44336;
+    }
+    code {
+      background: #2a2a2a;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 Deploy to Puter Hosting</h1>
+  
+  <div class="form-group">
+    <label>📁 Folder Name (where your files are):</label>
+    <input type="text" id="dirName" placeholder="e.g., Puter-AI-PWA-multimodal" />
+    <small style="color: #888;">This is the folder in Puter that contains index.html</small>
+  </div>
+
+  <div class="form-group">
+    <label>🌐 Subdomain (URL will be: yourname.puter.site):</label>
+    <input type="text" id="subdomain" value="amon-multimodal-ai" />
+    <small style="color: #888;">Lowercase, no spaces. Example: my-cool-app</small>
+  </div>
+
+  <button onclick="deploy()">Deploy Now</button>
+
+  <div id="status"></div>
+
+  <script src="https://js.puter.com/v2/"></script>
+  <script>
+    async function deploy() {
+      const dirName = document.getElementById('dirName').value.trim();
+      const subdomain = document.getElementById('subdomain').value.trim();
+      const statusDiv = document.getElementById('status');
+
+      // Validation
+      if (!dirName) {
+        showStatus('Please enter a folder name', 'error');
+        return;
+      }
+      if (!subdomain) {
+        showStatus('Please enter a subdomain', 'error');
+        return;
+      }
+      if (!/^[a-z0-9-]+$/.test(subdomain)) {
+        showStatus('Subdomain must be lowercase letters, numbers, and hyphens only', 'error');
+        return;
+      }
+
+      try {
+        statusDiv.style.display = 'block';
+        statusDiv.className = '';
+        statusDiv.innerHTML = '⏳ Deploying...';
+
+        // Check if directory exists first
+        try {
+          await puter.fs.stat(dirName);
+        } catch (e) {
+          showStatus(`❌ Directory "${dirName}" not found. Please check the folder name.`, 'error');
+          return;
+        }
+
+        // Deploy the website
+        const site = await puter.hosting.create(subdomain, dirName);
+
+        const url = 'https://' + site.subdomain + '.puter.site';
+        showStatus(
+          `✅ Deployed successfully!<br><br>` +
+          `<strong>Your site:</strong> <a href="${url}" target="_blank" style="color: #4caf50;">${url}</a><br><br>` +
+          `<small>It may take a few moments to propagate.</small>`,
+          'success'
+        );
+
+        console.log('Deployed at:', url);
+
+      } catch (error) {
+        let errorMsg = error.message || 'Unknown error';
+        
+        if (errorMsg.includes('already exists')) {
+          errorMsg = `Subdomain "${subdomain}" is already taken. Try a different name.`;
+        } else if (errorMsg.includes('not pointing to a directory')) {
+          errorMsg = `Directory "${dirName}" not found or invalid. Make sure the folder exists and contains index.html.`;
+        }
+
+        showStatus(`❌ Error: ${errorMsg}`, 'error');
+        console.error('Deploy error:', error);
+      }
+    }
+
+    function showStatus(message, type) {
+      const statusDiv = document.getElementById('status');
+      statusDiv.style.display = 'block';
+      statusDiv.className = type;
+      statusDiv.innerHTML = message;
+    }
+
+    // Auto-focus first input
+    document.getElementById('dirName').focus();
+  </script>
+</body>
+</html>

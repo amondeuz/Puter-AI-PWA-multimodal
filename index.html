@@ -219,6 +219,37 @@
       gap: 8px;
       align-items: center;
     }
+
+    /* Free Models Only Toggle */
+    .free-only-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 6px 10px;
+      background-color: #f0f7ff;
+      border: 1px solid #b3d9ff;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .free-only-toggle input[type="checkbox"] {
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+    }
+
+    .free-only-toggle label {
+      cursor: pointer;
+      user-select: none;
+      margin: 0;
+    }
+
+    .free-only-toggle .info-icon {
+      color: #2c7aef;
+      font-size: 14px;
+      cursor: help;
+    }
   </style>
 
   <script src="https://js.puter.com/v2/"></script>
@@ -250,7 +281,8 @@
     <div id="chatOptions" class="mode-options">
       <label for="chatScopeSelect">Source:</label>
       <select id="chatScopeSelect">
-        <option value="direct">Direct (non-OpenRouter)</option>
+        <option value="direct">Direct</option>
+        <option value="togetherai">TogetherAI</option>
         <option value="openrouter">OpenRouter</option>
       </select>
 
@@ -264,10 +296,15 @@
         <!-- Populated from live model list -->
       </select>
 
+      <div class="free-only-toggle">
+        <input type="checkbox" id="freeOnlyCheckbox">
+        <label for="freeOnlyCheckbox">☐ Free Models Only (29 models)</label>
+        <span class="info-icon" title="Show only free models with :free suffix (e.g. kimi-k2:free). May have rate limits but no per-token cost.">ℹ️</span>
+      </div>
+
       <span class="help-text">
         Models are loaded live from Puter - the list comes from
-        <code>https://puter.com/puterai/chat/models</code>. Source splits OpenRouter models from everything
-        else, and the company field groups providers under OpenRouter.
+        <code>https://puter.com/puterai/chat/models</code>. Three sources available: Direct (Anthropic, OpenAI, Google, etc.), TogetherAI, and OpenRouter. Company field groups providers within each source.
       </span>
     </div>
 
@@ -739,137 +776,285 @@
     }
   }
 
-  // ---------- Chat model hierarchy from live endpoint ----------
+  // ---------- Chat model loading from local models.json ----------
 
-  // Fallback models when CORS blocks dynamic fetch (for GitHub Pages, etc.)
-  const FALLBACK_CHAT_MODELS = [
-    // Claude models (Anthropic)
-    'claude-sonnet-4-20250514',
-    'claude-3-5-sonnet-20241022',
-    'claude-3-5-sonnet-20240620',
-    'claude-3-opus-20240229',
-    'claude-3-sonnet-20240229',
-    'claude-3-haiku-20240307',
-    
-    // GPT models (OpenAI)
-    'gpt-4o',
-    'gpt-4o-mini',
-    'gpt-4-turbo',
-    'gpt-4',
-    'gpt-3.5-turbo',
-    
-    // Gemini models (Google)
-    'gemini-2.5-flash',
-    'gemini-2.0-flash-exp',
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
-    
-    // Llama models (Meta) via OpenRouter
-    'openrouter:meta-llama/llama-3.3-70b-instruct',
-    'openrouter:meta-llama/llama-3.2-90b-vision-instruct',
-    'openrouter:meta-llama/llama-3.1-405b-instruct',
-    
-    // Qwen models via OpenRouter
-    'openrouter:qwen/qwen-2.5-72b-instruct',
-    
-    // DeepSeek models via OpenRouter
-    'openrouter:deepseek/deepseek-chat',
-    
-    // Mistral models via OpenRouter
-    'openrouter:mistralai/mistral-large',
-    
-    // Others
-    'openrouter:google/gemini-pro-1.5',
-    'openrouter:anthropic/claude-3.5-sonnet'
-  ];
+  // Company lookup database (loaded from external file)
+  let MODEL_COMPANY_DATABASE = null;
 
-    // Try live Puter endpoint first, then local models.json, then hardcoded fallback
-  async function loadModelList() {
-    // 1) Live endpoint from Puter
+  // Free models list and toggle state
+  let FREE_MODELS_LIST = null;
+  let FREE_ONLY_MODE = false;
+
+  // Test/utility models to exclude from model list
+  const EXCLUDED_MODELS = ['model-fallback-test-1', 'fake', 'costly', 'abuse'];
+
+  /**
+   * Load the free models list from free-models.json.
+   * This provides a curated list of 29 free models (models with :free suffix).
+   */
+  async function loadFreeModelsList() {
     try {
-      const res = await fetch('https://puter.com/puterai/chat/models', { cache: 'no-store' });
+      const res = await fetch('free-models.json');
       if (res.ok) {
-        const json = await res.json();
-        if (Array.isArray(json.models)) {
-          console.log('Loaded live model list from puter.com');
-          return json.models;
-        }
-        console.warn('Live endpoint did not return models[] array');
-      } else {
-        console.warn('Live models endpoint returned', res.status, res.statusText);
+        FREE_MODELS_LIST = await res.json();
+        console.log(`Free models list loaded: ${FREE_MODELS_LIST.free_models.length} free models`);
+        return true;
       }
     } catch (e) {
-      console.warn('Error calling live models endpoint (likely CORS or network):', e);
+      console.warn('Free models list not available:', e.message);
     }
-
-    // 2) Local models.json snapshot that you can update manually
-    try {
-      const res = await fetch('models.json', { cache: 'no-store' });
-      if (res.ok) {
-        const json = await res.json();
-        if (Array.isArray(json.models)) {
-          console.log('Loaded fallback model list from local models.json');
-          return json.models;
-        }
-        console.warn('Local models.json did not contain models[] array');
-      } else {
-        console.warn('Local models.json fetch failed:', res.status, res.statusText);
-      }
-    } catch (e) {
-      console.error('Error loading local models.json:', e);
-    }
-
-    // 3) Last resort: hardcoded fallback list (may be incomplete)
-    console.warn('Falling back to hardcoded fallback chat models');
-    return FALLBACK_CHAT_MODELS.slice();
+    return false;
   }
 
+  /**
+   * Check if a model is in the free models list.
+   * @param {string} modelId - The full model ID (e.g. "openrouter:moonshotai/kimi-k2:free")
+   * @returns {boolean} - True if the model is in the free list
+   */
+  function isModelFree(modelId) {
+    if (!FREE_MODELS_LIST || !FREE_MODELS_LIST.free_models) {
+      return false;
+    }
+    return FREE_MODELS_LIST.free_models.includes(modelId);
+  }
+
+  /**
+   * Get filtered chat models based on FREE_ONLY_MODE.
+   * @returns {Array} - Array of model objects to display
+   */
+  function getFilteredChatModels() {
+    if (!FREE_ONLY_MODE) {
+      return CHAT_MODEL_DATA;
+    }
+    return CHAT_MODEL_DATA.filter(model => isModelFree(model.id));
+  }
+
+  /**
+   * Set up the free-only toggle functionality.
+   * Loads saved preference from Puter KV storage and sets up event listener.
+   */
+  async function setupFreeOnlyToggle() {
+    const checkbox = document.getElementById('freeOnlyCheckbox');
+    if (!checkbox) return;
+
+    // Load saved preference
+    try {
+      const saved = await puter.kv.get('free_only_mode');
+      if (saved !== undefined && saved !== null) {
+        FREE_ONLY_MODE = saved === 'true' || saved === true;
+        checkbox.checked = FREE_ONLY_MODE;
+        if (FREE_ONLY_MODE) {
+          console.log('Free-only mode enabled. Showing ' + getFilteredChatModels().length + ' models.');
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load free-only preference:', e);
+    }
+
+    // Set up toggle event listener
+    checkbox.addEventListener('change', async function() {
+      FREE_ONLY_MODE = checkbox.checked;
+      
+      // Save preference
+      try {
+        await puter.kv.set('free_only_mode', FREE_ONLY_MODE);
+      } catch (e) {
+        console.warn('Could not save free-only preference:', e);
+      }
+
+      // Log the change
+      if (FREE_ONLY_MODE) {
+        console.log('Free-only mode enabled. Showing ' + getFilteredChatModels().length + ' models.');
+      } else {
+        console.log('Free-only mode disabled. Showing ' + getFilteredChatModels().length + ' models.');
+      }
+
+      // Refresh the model dropdowns
+      const current = {
+        chatScope: document.getElementById('chatScopeSelect').value,
+        chatCompany: document.getElementById('chatCompanySelect').value,
+        chatModel: document.getElementById('chatModelSelect').value
+      };
+      
+      // Re-initialize selectors with current settings
+      await initChatModelSelectors(current);
+
+      // If enabling free-only mode and Kimi K2 is available, optionally select it
+      if (FREE_ONLY_MODE && getFilteredChatModels().some(m => m.id === 'openrouter:moonshotai/kimi-k2:free')) {
+        document.getElementById('chatScopeSelect').value = 'openrouter';
+        document.getElementById('chatScopeSelect').dispatchEvent(new Event('change'));
+        // Give the dropdown time to populate, then select Kimi K2
+        setTimeout(() => {
+          const modelSelect = document.getElementById('chatModelSelect');
+          if (Array.from(modelSelect.options).some(opt => opt.value === 'openrouter:moonshotai/kimi-k2:free')) {
+            modelSelect.value = 'openrouter:moonshotai/kimi-k2:free';
+          }
+        }, 100);
+      }
+    });
+  }
+
+  /**
+   * Load the model-company database for accurate company attribution.
+   * This provides canonical company names for all 85+ companies across all sources.
+   */
+  async function loadModelCompanyDatabase() {
+    try {
+      const res = await fetch('model-company-database-v3-complete.json');
+      if (res.ok) {
+        MODEL_COMPANY_DATABASE = await res.json();
+        console.log('Model company database loaded:', MODEL_COMPANY_DATABASE.metadata);
+        return true;
+      }
+    } catch (e) {
+      console.warn('Model company database not available:', e.message);
+    }
+    return false;
+  }
+
+  /**
+   * Lookup company in v3 database for Direct models (models without source prefix).
+   * Returns canonical company name if found, null otherwise.
+   */
+  function lookupDirectModelCompany(modelId) {
+    if (!MODEL_COMPANY_DATABASE || !MODEL_COMPANY_DATABASE.model_registry) {
+      return null;
+    }
+
+    const registry = MODEL_COMPANY_DATABASE.model_registry;
+    const lowerModelId = modelId.toLowerCase();
+
+    // Search through all companies for exact match in direct_api array
+    for (const [companyKey, companyData] of Object.entries(registry)) {
+      const directModels = companyData.direct_api || [];
+      if (directModels.some(m => m.toLowerCase() === lowerModelId)) {
+        return companyKey;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Parse model ID with generic source detection.
+   * Handles ANY "source:company/model" format (not hardcoded to specific sources).
+   * Uses v3 database for Direct model company attribution.
+   */
   function parseModelId(id) {
-    const OPENROUTER_PREFIX = 'openrouter:';
     const result = {
       id,
-      isOpenRouter: false,
-      company: 'builtin',
+      source: 'direct',
+      company: 'other',
       name: id
     };
 
-    if (id.startsWith(OPENROUTER_PREFIX)) {
-      result.isOpenRouter = true;
-      const rest = id.slice(OPENROUTER_PREFIX.length);
+    // Check for generic "source:company/model" pattern
+    const colonIndex = id.indexOf(':');
+    if (colonIndex > 0) {
+      const source = id.slice(0, colonIndex);
+      const rest = id.slice(colonIndex + 1);
       const slashIndex = rest.indexOf('/');
+      
       if (slashIndex >= 0) {
+        // Pattern: "source:company/model"
+        result.source = source;
         result.company = rest.slice(0, slashIndex);
         result.name = rest.slice(slashIndex + 1);
       } else {
-        result.company = 'openrouter';
+        // Pattern: "source:model" (no company specified)
+        result.source = source;
+        result.company = source;
         result.name = rest;
       }
+    } else {
+      // Direct model (no source prefix) - use v3 database for company lookup
+      result.source = 'direct';
+      
+      const dbCompany = lookupDirectModelCompany(id);
+      if (dbCompany) {
+        result.company = dbCompany;
+      } else {
+        result.company = 'other';
+      }
+      
+      result.name = id;
     }
+
+    // Add legacy compatibility flags for specific sources
+    result.isOpenRouter = (result.source === 'openrouter');
+    result.isTogetherAI = (result.source === 'togetherai');
 
     return result;
   }
 
-      // Use the combined loader: live → models.json → fallback array
-    const raw = await loadModelList();
-    CHAT_MODEL_DATA = raw.map(parseModelId);
+  async function initChatModelSelectors(defaults) {
+    const scopeSelect = document.getElementById('chatScopeSelect');
+    const companySelect = document.getElementById('chatCompanySelect');
+    const modelSelect = document.getElementById('chatModelSelect');
 
-    if (!CHAT_MODEL_DATA.length) {
-      console.error('No chat models available from live endpoint, models.json, or fallback list');
+    if (!scopeSelect || !companySelect || !modelSelect) return;
+
+    let defaultScope = (defaults && defaults.chatScope) || 'direct';
+    let defaultCompany = (defaults && defaults.chatCompany) || '__all';
+    let defaultModelId = (defaults && defaults.chatModel) || '';
+
+    // Load company database first
+    await loadModelCompanyDatabase();
+
+    // Load free models list
+    await loadFreeModelsList();
+
+    try {
+      // Fetch from LOCAL models.json file
+      const res = await fetch('models.json');
+      if (!res.ok) {
+        throw new Error(`Failed to load models.json: ${res.status} ${res.statusText}`);
+      }
+      
+      const json = await res.json();
+      const raw = Array.isArray(json.models) ? json.models : [];
+      
+      // Filter out excluded test models and parse
+      const filtered = raw.filter(id => !EXCLUDED_MODELS.includes(id));
+      CHAT_MODEL_DATA = filtered.map(parseModelId);
+      
+      console.log(`Loaded ${CHAT_MODEL_DATA.length} models from models.json`);
+    } catch (e) {
+      console.error('Error loading models.json:', e);
+      alert('Failed to load model list. Please check that models.json is available.');
       return;
     }
 
+    if (!CHAT_MODEL_DATA.length) {
+      console.error('No chat models available in models.json');
+      return;
+    }
 
     const matchingDefault = CHAT_MODEL_DATA.find(m => m.id === defaultModelId);
     if (matchingDefault) {
-      defaultScope = matchingDefault.isOpenRouter ? 'openrouter' : 'direct';
+      if (matchingDefault.isOpenRouter) {
+        defaultScope = 'openrouter';
+      } else if (matchingDefault.isTogetherAI) {
+        defaultScope = 'togetherai';
+      } else {
+        defaultScope = 'direct';
+      }
       defaultCompany = matchingDefault.company;
     }
 
     function filteredModels(scope, company) {
-      return CHAT_MODEL_DATA.filter(m => {
+      // Start with either all models or just free models based on FREE_ONLY_MODE
+      const baseModels = getFilteredChatModels();
+      
+      return baseModels.filter(m => {
+        // Filter by source
         if (scope === 'openrouter' && !m.isOpenRouter) return false;
-        if (scope === 'direct' && m.isOpenRouter) return false;
+        if (scope === 'togetherai' && !m.isTogetherAI) return false;
+        if (scope === 'direct' && (m.isOpenRouter || m.isTogetherAI)) return false;
+        
+        // Filter by company
         if (company && company !== '__all' && m.company !== company) return false;
+        
         return true;
       });
     }
@@ -1094,6 +1279,9 @@
 
     document.getElementById('ttsProviderSelect').addEventListener('change', updateTtsUi);
     document.getElementById('ttsModelSelect').addEventListener('change', updateTtsUi);
+    
+    // Set up free-only toggle
+    setupFreeOnlyToggle();
   }
 
   document.querySelector("#messageInput").addEventListener("keypress", function (event) {

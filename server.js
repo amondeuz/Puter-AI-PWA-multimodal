@@ -24,6 +24,230 @@ function loadDb() {
 }
 
 // ============================================================================
+// BOOST TIER SYSTEM & ACCOUNT EXHAUSTION
+// ============================================================================
+
+// Boost tier mapping
+const BOOST_TIERS = {
+  turbo: 'remote_free',      // Free-tier models (no cost)
+  ultra: 'credit_backed'     // Puter credit-backed models
+};
+
+// Map boost tier to cost tier
+function boostTierToCostTier(boostTier) {
+  return BOOST_TIERS[boostTier] || null;
+}
+
+// Get Puter credit balance (uses Puter SDK if available)
+async function getPuterCredits() {
+  try {
+    if (typeof puter === 'undefined' || !puter.auth) {
+      return {
+        available: false,
+        balance: null,
+        error: 'Puter SDK not available - not running inside Puter environment'
+      };
+    }
+
+    // Check if user is signed in
+    const isSignedIn = await puter.auth.isSignedIn();
+    if (!isSignedIn) {
+      return {
+        available: false,
+        balance: null,
+        error: 'No Puter user signed in'
+      };
+    }
+
+    // Get user info which includes credit balance
+    // Note: Actual API may vary - adjust based on Puter SDK documentation
+    const user = await puter.auth.getUser();
+
+    return {
+      available: true,
+      balance: user.credits || 0,
+      username: user.username,
+      error: null
+    };
+  } catch (error) {
+    return {
+      available: false,
+      balance: null,
+      error: error.message
+    };
+  }
+}
+
+// Parse rate limit headers from provider response
+function parseRateLimitHeaders(headers, provider) {
+  const limits = {
+    requests_remaining: null,
+    requests_limit: null,
+    tokens_remaining: null,
+    tokens_limit: null,
+    reset_time: null
+  };
+
+  if (!headers) return limits;
+
+  // Common header patterns across providers (Groq, Mistral, OpenAI-compatible)
+  const headerMap = {
+    'x-ratelimit-remaining-requests': 'requests_remaining',
+    'x-ratelimit-limit-requests': 'requests_limit',
+    'x-ratelimit-remaining-tokens': 'tokens_remaining',
+    'x-ratelimit-limit-tokens': 'tokens_limit',
+    'x-ratelimit-reset-requests': 'reset_time',
+    'x-ratelimit-reset': 'reset_time'
+  };
+
+  for (const [headerName, field] of Object.entries(headerMap)) {
+    const value = headers.get ? headers.get(headerName) : headers[headerName];
+    if (value !== undefined && value !== null) {
+      limits[field] = field.includes('time') ? value : parseInt(value);
+    }
+  }
+
+  return limits;
+}
+
+// In-memory rate limit cache (key: "provider:model_id", value: parsed limits)
+const rateLimitCache = {};
+
+// Check if a model is usable for current Puter account
+async function isModelUsable(model, db) {
+  const modelId = model.id;
+  const provider = model.provider;
+  const costTier = model.cost_tier;
+
+  // If model uses Puter credits, check credit balance
+  if (model.uses_puter_credits || costTier === 'credit_backed') {
+    const credits = await getPuterCredits();
+
+    if (!credits.available) {
+      // Can't verify - assume unusable if we can't check
+      return {
+        usable: false,
+        reason: 'Cannot verify Puter credits: ' + credits.error,
+        credits_required: true,
+        credits_available: null
+      };
+    }
+
+    if (credits.balance <= 0) {
+      return {
+        usable: false,
+        reason: 'Puter credits exhausted (balance: 0)',
+        credits_required: true,
+        credits_available: credits.balance
+      };
+    }
+
+    // Has credits - usable
+    return {
+      usable: true,
+      reason: 'Puter credits available',
+      credits_required: true,
+      credits_available: credits.balance
+    };
+  }
+
+  // For free-tier models, check if we have rate limit info from recent calls
+  const rateLimitKey = `${provider}:${modelId}`;
+  const recentLimits = rateLimitCache[rateLimitKey];
+
+  if (recentLimits) {
+    // Use real API data from recent call
+    if (recentLimits.requests_remaining !== null && recentLimits.requests_remaining <= 0) {
+      return {
+        usable: false,
+        reason: `Rate limit exhausted for ${provider} - ${recentLimits.requests_remaining} requests remaining`,
+        rate_limits: recentLimits
+      };
+    }
+
+    if (recentLimits.tokens_remaining !== null && recentLimits.tokens_remaining <= 0) {
+      return {
+        usable: false,
+        reason: `Token quota exhausted for ${provider} - ${recentLimits.tokens_remaining} tokens remaining`,
+        rate_limits: recentLimits
+      };
+    }
+  }
+
+  // No recent limit data - assume usable (optimistic)
+  // Real exhaustion will be detected on actual call
+  return {
+    usable: true,
+    reason: 'No exhaustion detected (no recent rate limit data)',
+    rate_limits: recentLimits || null
+  };
+}
+
+// Check if a boost tier is exhausted for current account
+async function checkBoostTierExhaustion(boostTier, db) {
+  const costTier = boostTierToCostTier(boostTier);
+
+  if (!costTier) {
+    return {
+      boost_tier: boostTier,
+      valid: false,
+      error: `Invalid boost_tier: ${boostTier}. Must be 'turbo' or 'ultra'.`
+    };
+  }
+
+  // Get all models for this boost tier
+  const allModels = buildModelList(db);
+  const tierModels = allModels.filter(m => m.cost_tier === costTier);
+
+  if (tierModels.length === 0) {
+    return {
+      boost_tier: boostTier,
+      cost_tier: costTier,
+      valid: true,
+      exhausted: true,
+      reason: 'No models available for this boost tier',
+      total_models: 0,
+      usable_models: 0,
+      unusable_models: 0
+    };
+  }
+
+  // Check usability of each model
+  const usabilityChecks = await Promise.all(
+    tierModels.map(async (model) => ({
+      model_id: model.id,
+      provider: model.provider,
+      check: await isModelUsable(model, db)
+    }))
+  );
+
+  const usableModels = usabilityChecks.filter(c => c.check.usable);
+  const unusableModels = usabilityChecks.filter(c => !c.check.usable);
+
+  const exhausted = usableModels.length === 0;
+
+  return {
+    boost_tier: boostTier,
+    cost_tier: costTier,
+    valid: true,
+    exhausted: exhausted,
+    total_models: tierModels.length,
+    usable_models: usableModels.length,
+    unusable_models: unusableModels.length,
+    usable_model_ids: usableModels.map(c => c.model_id),
+    unusable_model_ids: unusableModels.map(c => c.model_id),
+    unusable_reasons: unusableModels.map(c => ({
+      model_id: c.model_id,
+      provider: c.provider,
+      reason: c.check.reason
+    })),
+    message: exhausted
+      ? `All eligible ${boostTier} models are exhausted for this Puter account. Please log out of Puter OS and log into the next account in your rotation if you want to continue using this tier.`
+      : `${usableModels.length} of ${tierModels.length} ${boostTier} models are still usable.`
+  };
+}
+
+// ============================================================================
 // MODEL UTILITIES
 // ============================================================================
 
@@ -568,16 +792,30 @@ app.get('/models', (req, res) => {
 app.post('/suggest-models', (req, res) => {
   try {
     const db = loadDb();
-    const models = buildModelList(db);
+    let models = buildModelList(db);
+
+    // Filter by boost_tier if specified
+    const boostTier = req.body.boost_tier;
+    if (boostTier) {
+      const costTier = boostTierToCostTier(boostTier);
+      if (!costTier) {
+        return res.status(400).json({
+          error: `Invalid boost_tier: ${boostTier}. Must be 'turbo' or 'ultra'.`
+        });
+      }
+      models = models.filter(m => m.cost_tier === costTier);
+    }
+
     const suggestions = suggestModels(models, {
       provider: req.body.provider,
-      cost_tier: req.body.cost_tier,
+      cost_tier: req.body.cost_tier || (boostTier ? boostTierToCostTier(boostTier) : undefined),
       capability: req.body.capability,
       max_cost_tier: req.body.max_cost_tier
     });
     res.json({
       models: suggestions,
       count: suggestions.length,
+      boost_tier: boostTier || null,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -601,18 +839,43 @@ app.post('/run', async (req, res) => {
 
   try {
     const db = loadDb();
-    const models = buildModelList(db);
+    let models = buildModelList(db);
+
+    // Filter by boost_tier if specified
+    const boostTier = req.body.boost_tier;
+    if (boostTier) {
+      const costTier = boostTierToCostTier(boostTier);
+      if (!costTier) {
+        return res.status(400).json({
+          error: `Invalid boost_tier: ${boostTier}. Must be 'turbo' or 'ultra'.`
+        });
+      }
+      models = models.filter(m => m.cost_tier === costTier);
+    }
+
     const selected = pickModel(models, req.body || {});
 
     if (!selected) {
       return res.status(400).json({
         error: 'No model matched request',
-        request: req.body
+        request: req.body,
+        boost_tier: boostTier,
+        available_models_count: models.length
       });
     }
 
     // Make actual provider call
     const providerResponse = await callProvider(selected, req.body);
+
+    // TODO: Capture rate limit headers from providerResponse if available
+    // For now, we'd need to modify callProvider to return headers as well
+    // This would require changing all provider functions to return { data, headers }
+
+    // Check boost tier exhaustion after call
+    let exhaustionCheck = null;
+    if (boostTier) {
+      exhaustionCheck = await checkBoostTierExhaustion(boostTier, db);
+    }
 
     res.json({
       model_id: selected.id,
@@ -625,11 +888,15 @@ app.post('/run', async (req, res) => {
       error: null,
       metadata: {
         cost_tier: selected.cost_tier,
+        boost_tier: boostTier || null,
         execution_time_ms: Date.now() - startTime,
         timestamp: new Date().toISOString(),
         usage: providerResponse.usage || null,
         rate_limits: selected.limits || null
-      }
+      },
+      // Exhaustion signals
+      boost_tier_exhausted: exhaustionCheck?.exhausted || false,
+      boost_tier_message: exhaustionCheck?.message || null
     });
   } catch (error) {
     res.status(500).json({
@@ -638,6 +905,140 @@ app.post('/run', async (req, res) => {
         execution_time_ms: Date.now() - startTime,
         timestamp: new Date().toISOString()
       }
+    });
+  }
+});
+
+// ============================================================================
+// ACCOUNT STATUS & PREFLIGHT - BOOST TIER EXHAUSTION DETECTION
+// ============================================================================
+
+// GET /account/status - Check account status for a boost tier
+app.get('/account/status', async (req, res) => {
+  try {
+    const db = loadDb();
+    const boostTier = req.query.boost_tier || 'turbo'; // Default to turbo
+
+    // Check Puter credits if requested or if checking ultra tier
+    let puterCredits = null;
+    if (boostTier === 'ultra' || req.query.include_credits === 'true') {
+      puterCredits = await getPuterCredits();
+    }
+
+    // Check exhaustion for the requested boost tier
+    const tierStatus = await checkBoostTierExhaustion(boostTier, db);
+
+    // Also check the other tier for comparison
+    const otherTier = boostTier === 'turbo' ? 'ultra' : 'turbo';
+    const otherTierStatus = await checkBoostTierExhaustion(otherTier, db);
+
+    // Determine global account exhaustion (both tiers exhausted)
+    const accountExhausted = tierStatus.exhausted && otherTierStatus.exhausted;
+
+    res.json({
+      puter_account: puterCredits?.username || 'unknown',
+      puter_credits: puterCredits,
+      boost_tier_requested: boostTier,
+      boost_tier_status: tierStatus,
+      other_tier_status: otherTierStatus,
+      account_exhausted: accountExhausted,
+      recommendation: accountExhausted
+        ? 'All boost tiers exhausted. Log out of Puter and log into next account in rotation.'
+        : tierStatus.exhausted
+          ? `${boostTier} tier exhausted. Consider using ${otherTier} tier, or log out and switch accounts.`
+          : `${boostTier} tier is still usable.`,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// POST /preflight - Check if a task can run with current account status
+app.post('/preflight', async (req, res) => {
+  try {
+    const db = loadDb();
+    const { boost_tier, task_type, capability, estimated_tokens } = req.body;
+
+    if (!boost_tier) {
+      return res.status(400).json({
+        error: 'boost_tier is required (must be "turbo" or "ultra")'
+      });
+    }
+
+    // Check boost tier exhaustion
+    const tierStatus = await checkBoostTierExhaustion(boost_tier, db);
+
+    if (!tierStatus.valid) {
+      return res.status(400).json({
+        error: tierStatus.error
+      });
+    }
+
+    // Get models for this boost tier that match the capability
+    const allModels = buildModelList(db);
+    let candidateModels = allModels.filter(m =>
+      m.cost_tier === tierStatus.cost_tier &&
+      tierStatus.usable_model_ids.includes(m.id)
+    );
+
+    // Filter by capability if specified
+    if (capability) {
+      candidateModels = candidateModels.filter(m =>
+        m.capabilities?.[capability] === true
+      );
+    }
+
+    // Filter by task_type if specified
+    if (task_type) {
+      const taskCapabilityMap = {
+        chat: 'chat',
+        reasoning: 'reasoning',
+        coding: 'coding',
+        image_generation: 'images',
+        speech: 'audio_speech',
+        music: 'audio_music',
+        vision: 'vision',
+        video: 'video'
+      };
+      const requiredCap = taskCapabilityMap[task_type];
+      if (requiredCap) {
+        candidateModels = candidateModels.filter(m =>
+          m.capabilities?.[requiredCap] === true
+        );
+      }
+    }
+
+    const canRun = candidateModels.length > 0;
+
+    res.json({
+      boost_tier: boost_tier,
+      cost_tier: tierStatus.cost_tier,
+      boost_tier_exhausted: tierStatus.exhausted,
+      can_run: canRun,
+      candidate_models: candidateModels.map(m => ({
+        model_id: m.id,
+        provider: m.provider,
+        capabilities: m.capabilities,
+        ratings: m.ratings
+      })),
+      suggested_model: candidateModels.length > 0
+        ? candidateModels.sort((a, b) =>
+          (b.ratings?.speed || 0) - (a.ratings?.speed || 0)
+        )[0].id
+        : null,
+      message: !canRun
+        ? tierStatus.message
+        : `${candidateModels.length} model(s) available for this task in ${boost_tier} tier.`,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 });

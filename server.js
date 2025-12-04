@@ -59,6 +59,20 @@ function parseRouteKey(routeKey) {
       return { provider: 'togetherai', route: 'togetherai' };
     case 'groq':
       return { provider: 'groq', route: 'groq' };
+    case 'mistral':
+      return { provider: 'mistral', route: 'mistral' };
+    case 'cerebras':
+      return { provider: 'cerebras', route: 'cerebras' };
+    case 'cloudflare':
+      return { provider: 'cloudflare', route: 'cloudflare' };
+    case 'huggingface':
+      return { provider: 'huggingface', route: 'huggingface' };
+    case 'gemini':
+      return { provider: 'gemini', route: 'gemini' };
+    case 'github':
+      return { provider: 'github', route: 'github' };
+    case 'puter':
+      return { provider: 'puter', route: 'puter' };
     case 'direct_api':
       return { provider: 'direct', route: 'direct' };
     default:
@@ -88,7 +102,19 @@ function buildModelList(db) {
   const models = [];
 
   Object.entries(db.model_registry || {}).forEach(([companyKey, company]) => {
-    const buckets = ['direct_api', 'openrouter', 'togetherai', 'groq'];
+    const buckets = [
+      'direct_api',
+      'openrouter',
+      'togetherai',
+      'groq',
+      'mistral',
+      'cerebras',
+      'cloudflare',
+      'huggingface',
+      'gemini',
+      'github',
+      'puter'
+    ];
     buckets.forEach((bucket) => {
       const arr = company[bucket];
       if (!Array.isArray(arr)) return;
@@ -242,6 +268,190 @@ async function callOpenRouter(model, input) {
   return await response.json();
 }
 
+async function callCerebras(model, input) {
+  const apiKey = process.env.CEREBRAS_API_KEY;
+  if (!apiKey) {
+    throw new Error('CEREBRAS_API_KEY not configured');
+  }
+
+  const response = await fetch('https://api.cerebras.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: model.id,
+      messages: input.messages || [{ role: 'user', content: input.input || input.prompt || '' }],
+      temperature: input.temperature || 0.7,
+      max_tokens: input.max_tokens || 1024
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Cerebras API error: ${response.status} - ${error}`);
+  }
+
+  return await response.json();
+}
+
+async function callCloudflare(model, input) {
+  const apiKey = process.env.CLOUDFLARE_API_KEY;
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+
+  if (!apiKey) {
+    throw new Error('CLOUDFLARE_API_KEY not configured');
+  }
+  if (!accountId) {
+    throw new Error('CLOUDFLARE_ACCOUNT_ID not configured');
+  }
+
+  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model.id}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      messages: input.messages || [{ role: 'user', content: input.input || input.prompt || '' }],
+      temperature: input.temperature || 0.7,
+      max_tokens: input.max_tokens || 1024
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Cloudflare API error: ${response.status} - ${error}`);
+  }
+
+  return await response.json();
+}
+
+async function callHuggingFace(model, input) {
+  const apiKey = process.env.HUGGINGFACE_API_KEY;
+  if (!apiKey) {
+    throw new Error('HUGGINGFACE_API_KEY not configured');
+  }
+
+  const response = await fetch(`https://api-inference.huggingface.co/models/${model.id}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      inputs: input.input || input.prompt || '',
+      parameters: {
+        temperature: input.temperature || 0.7,
+        max_new_tokens: input.max_tokens || 1024
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Hugging Face API error: ${response.status} - ${error}`);
+  }
+
+  return await response.json();
+}
+
+async function callGemini(model, input) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY not configured');
+  }
+
+  const messages = input.messages || [{ role: 'user', content: input.input || input.prompt || '' }];
+
+  // Convert messages to Gemini format
+  const contents = messages.map(msg => ({
+    role: msg.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: msg.content }]
+  }));
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model.id}:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      contents: contents,
+      generationConfig: {
+        temperature: input.temperature || 0.7,
+        maxOutputTokens: input.max_tokens || 1024
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Gemini API error: ${response.status} - ${error}`);
+  }
+
+  return await response.json();
+}
+
+async function callGitHub(model, input) {
+  const apiKey = process.env.GITHUB_TOKEN;
+  if (!apiKey) {
+    throw new Error('GITHUB_TOKEN not configured');
+  }
+
+  const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: model.id,
+      messages: input.messages || [{ role: 'user', content: input.input || input.prompt || '' }],
+      temperature: input.temperature || 0.7,
+      max_tokens: input.max_tokens || 1024
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`GitHub Models API error: ${response.status} - ${error}`);
+  }
+
+  return await response.json();
+}
+
+async function callPuter(model, input) {
+  // Puter built-in AI - this uses the Puter SDK's ai.* functions
+  // This is a placeholder for Puter SDK integration
+  // In a real Puter app, this would use: puter.ai.chat() or puter.ai.txt2img() etc.
+
+  if (typeof puter === 'undefined' || !puter.ai) {
+    throw new Error('Puter SDK not available - this endpoint only works inside Puter environment');
+  }
+
+  const prompt = input.input || input.prompt ||
+    (input.messages && input.messages[input.messages.length - 1]?.content) || '';
+
+  // Determine which Puter AI function to call based on model capabilities
+  if (model.capabilities?.images) {
+    const result = await puter.ai.txt2img(prompt);
+    return {
+      choices: [{ message: { content: result } }],
+      usage: { total_tokens: 0 }
+    };
+  } else {
+    const result = await puter.ai.chat(prompt, {
+      model: model.id,
+      temperature: input.temperature || 0.7
+    });
+    return {
+      choices: [{ message: { content: result } }],
+      usage: { total_tokens: 0 }
+    };
+  }
+}
+
 async function callDirect(model, input) {
   // For direct API calls (OpenAI, Anthropic, Google, etc.)
   const provider = model.company;
@@ -313,6 +523,18 @@ async function callProvider(model, input) {
       return await callMistral(model, input);
     case 'openrouter':
       return await callOpenRouter(model, input);
+    case 'cerebras':
+      return await callCerebras(model, input);
+    case 'cloudflare':
+      return await callCloudflare(model, input);
+    case 'huggingface':
+      return await callHuggingFace(model, input);
+    case 'gemini':
+      return await callGemini(model, input);
+    case 'github':
+      return await callGitHub(model, input);
+    case 'puter':
+      return await callPuter(model, input);
     case 'direct':
       return await callDirect(model, input);
     default:

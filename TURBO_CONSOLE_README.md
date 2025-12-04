@@ -11,10 +11,16 @@ Turbo Console is a **programmatic API service** designed to be called by [Pinoki
 ```
 Pinokio (Local) → Turbo Console API (Remote) → Multiple Providers
                                                ├─ Groq (20 free models)
-                                               ├─ OpenRouter
-                                               ├─ Mistral
-                                               ├─ OpenAI
-                                               ├─ Anthropic
+                                               ├─ Mistral (2 free models)
+                                               ├─ Cerebras (3 free models)
+                                               ├─ Cloudflare Workers AI (5+ free models)
+                                               ├─ Gemini (2 free models)
+                                               ├─ GitHub Models (9 free models)
+                                               ├─ Hugging Face (many free models)
+                                               ├─ Puter Built-in (credit-backed)
+                                               ├─ OpenRouter (aggregation)
+                                               ├─ OpenAI (paid)
+                                               ├─ Anthropic (paid)
                                                └─ ...
 ```
 
@@ -218,16 +224,65 @@ Models are organized by cost tier:
 
 The `/suggest-models` endpoint automatically prefers cheaper tiers.
 
-## Free Tier Models (Groq)
+## Supported Providers
 
-Turbo Console includes **20 free models** via Groq:
+Turbo Console integrates **11 AI providers** with focus on free tiers:
 
-- **Chat:** llama-3.1-8b-instant, llama-3.3-70b-versatile, groq/compound, etc.
-- **Speech-to-Text:** whisper-large-v3, whisper-large-v3-turbo
-- **Text-to-Speech:** playai-tts, playai-tts-arabic
-- **Reasoning:** Various Llama 4 and Kimi models
+### Free Tier Providers
 
-Rate limits apply (e.g., 30 req/min, 14400 req/day for Llama 3.1).
+1. **Groq** (20 free models)
+   - Models: llama-3.1-8b-instant, llama-3.3-70b-versatile, whisper-large-v3, playai-tts, etc.
+   - Rate limits: 30 req/min, 14400 req/day (varies by model)
+   - Setup: `GROQ_API_KEY` from https://console.groq.com
+
+2. **Mistral AI** (2 free models)
+   - Models: mistral-small-latest, pixtral-12b-2409
+   - Rate limits: Check https://console.mistral.ai
+   - Setup: `MISTRAL_API_KEY` from https://console.mistral.ai
+
+3. **Cerebras Inference** (3 free models)
+   - Models: llama3.1-8b, llama3.1-70b, llama3.3-70b
+   - Rate limits: Check https://cloud.cerebras.ai
+   - Setup: `CEREBRAS_API_KEY` from https://cloud.cerebras.ai
+
+4. **Cloudflare Workers AI** (5+ free models)
+   - Models: @cf/meta/llama-3.1-8b-instruct, @cf/meta/llama-3.2-1b-instruct, etc.
+   - Rate limits: 10,000 neurons/day
+   - Setup: `CLOUDFLARE_API_KEY` and `CLOUDFLARE_ACCOUNT_ID`
+
+5. **Google Gemini** (2 free models)
+   - Models: gemini-2.0-flash-exp, gemini-1.5-flash
+   - Rate limits: Check https://ai.google.dev/pricing
+   - Setup: `GEMINI_API_KEY` from https://ai.google.dev
+
+6. **GitHub Models** (9 free models - beta)
+   - Models: gpt-4o, gpt-4o-mini, meta-llama-3.1-405b-instruct, mistral-large-2407, etc.
+   - Rate limits: Free during beta
+   - Setup: `GITHUB_TOKEN` from https://github.com/settings/tokens
+
+7. **Hugging Face Inference** (many free models)
+   - Models: Any model on HuggingFace with inference API enabled
+   - Rate limits: Varies by model
+   - Setup: `HUGGINGFACE_API_KEY` from https://huggingface.co
+
+8. **Puter Built-in AI** (credit-backed)
+   - Models: puter-chat, puter-txt2img, puter-completion
+   - Cost: Uses Puter credits (free allocation included)
+   - Setup: No API key needed (automatically available in Puter environment)
+
+### Paid/Aggregation Providers
+
+9. **OpenRouter** (aggregation - some free models)
+   - Access to 100+ models via single API
+   - Setup: `OPENROUTER_API_KEY` from https://openrouter.ai
+
+10. **OpenAI** (paid)
+    - Models: gpt-4o, gpt-4o-mini, etc.
+    - Setup: `OPENAI_API_KEY` from https://platform.openai.com
+
+11. **Anthropic** (paid)
+    - Models: claude-sonnet-4.5, etc.
+    - Setup: `ANTHROPIC_API_KEY` from https://console.anthropic.com
 
 ## Model Metadata
 
@@ -252,15 +307,21 @@ You can extend this database with additional providers and models.
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GROQ_API_KEY` | Yes (for free tier) | Groq API key |
-| `OPENROUTER_API_KEY` | Optional | OpenRouter API key |
-| `MISTRAL_API_KEY` | Optional | Mistral AI API key |
-| `OPENAI_API_KEY` | Optional | OpenAI API key |
-| `ANTHROPIC_API_KEY` | Optional | Anthropic API key |
-| `PORT` | Optional | Server port (default 8080) |
-| `APP_URL` | Optional | App URL for OpenRouter |
+| Variable | Required | Provider | Description |
+|----------|----------|----------|-------------|
+| `GROQ_API_KEY` | Recommended | Groq | Free tier - 20 models |
+| `MISTRAL_API_KEY` | Optional | Mistral | Free tier - 2 models |
+| `CEREBRAS_API_KEY` | Optional | Cerebras | Free tier - 3 models |
+| `CLOUDFLARE_API_KEY` | Optional | Cloudflare | Free tier - 10k neurons/day |
+| `CLOUDFLARE_ACCOUNT_ID` | Optional | Cloudflare | Required with Cloudflare key |
+| `GEMINI_API_KEY` | Optional | Google | Free tier - 2 Gemini models |
+| `GITHUB_TOKEN` | Optional | GitHub | Free beta - 9 models |
+| `HUGGINGFACE_API_KEY` | Optional | HuggingFace | Free inference API |
+| `OPENROUTER_API_KEY` | Optional | OpenRouter | Aggregation platform |
+| `OPENAI_API_KEY` | Optional | OpenAI | Paid tier |
+| `ANTHROPIC_API_KEY` | Optional | Anthropic | Paid tier |
+| `PORT` | Optional | Server | Server port (default 8080) |
+| `APP_URL` | Optional | Server | App URL for OpenRouter |
 
 ## Testing
 

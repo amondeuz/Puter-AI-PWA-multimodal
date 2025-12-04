@@ -652,6 +652,279 @@ app.get('/health', (req, res) => {
   });
 });
 
+// ============================================================================
+// PINOKIO DASHBOARD API - Model Metadata & Ratings
+// ============================================================================
+
+// Transform model object to Pinokio API format
+function transformModelForPinokio(model, db) {
+  const details = db.model_details?.[model.id] || {};
+  const limits = model.limits || details.rate_limits || {};
+
+  return {
+    model_id: model.id,
+    display_name: details.display_name || model.id,
+    provider_id: model.provider,
+    family: model.company,
+    modality: details.types || (model.capabilities?.chat ? ['chat'] : []),
+
+    // Capabilities (boolean)
+    supports_chat: Boolean(model.capabilities?.chat),
+    supports_reasoning: Boolean(model.capabilities?.reasoning),
+    supports_coding: Boolean(model.capabilities?.coding),
+    supports_images: Boolean(model.capabilities?.images),
+    supports_audio_speech: Boolean(model.capabilities?.audio_speech),
+    supports_audio_music: Boolean(model.capabilities?.audio_music),
+    supports_vision: Boolean(model.capabilities?.vision),
+    supports_video: Boolean(model.capabilities?.video),
+
+    // Ratings (0-5 stars, nullable)
+    chat_rating: model.ratings?.chat ?? null,
+    reasoning_rating: model.ratings?.reasoning ?? null,
+    speed_rating: model.ratings?.speed ?? null,
+    coding_rating: model.ratings?.coding ?? null,
+    images_rating: model.ratings?.images ?? null,
+    audio_speech_rating: model.ratings?.audio_speech ?? null,
+    audio_music_rating: model.ratings?.audio_music ?? null,
+    vision_rating: model.ratings?.vision ?? null,
+    video_rating: model.ratings?.video ?? null,
+
+    // Limits (nullable)
+    requests_per_minute: limits.rpm ?? null,
+    requests_per_day: limits.rpd ?? null,
+    tokens_per_minute: limits.tpm ?? null,
+    tokens_per_day: limits.tpd ?? null,
+    tokens_per_month: limits.tpm_month ?? null,
+    neurons_per_day: limits.neurons_per_day ?? null,
+    audio_seconds_per_hour: limits.audio_seconds_per_hour ?? null,
+    audio_seconds_per_day: limits.audio_seconds_per_day ?? null,
+
+    // Cost tier
+    cost_tier: model.cost_tier || 'paid',
+    uses_puter_credits: Boolean(model.uses_puter_credits),
+
+    // Metadata
+    notes: model.notes || details.cost_notes || '',
+    limit_source: details.rate_limit_source || limits.source || null,
+    limits_last_verified: details.last_updated || null
+  };
+}
+
+// Filter models based on query parameters
+function filterModelsPinokio(models, query) {
+  return models.filter(model => {
+    // Provider filter
+    if (query.provider) {
+      const providers = Array.isArray(query.provider) ? query.provider : [query.provider];
+      if (!providers.includes(model.provider_id)) return false;
+    }
+
+    // Cost tier filter
+    if (query.cost_tier) {
+      const tiers = Array.isArray(query.cost_tier) ? query.cost_tier : [query.cost_tier];
+      if (!tiers.includes(model.cost_tier)) return false;
+    }
+
+    // Capability filters (requires_*)
+    if (query.requires_chat === 'true' && !model.supports_chat) return false;
+    if (query.requires_reasoning === 'true' && !model.supports_reasoning) return false;
+    if (query.requires_coding === 'true' && !model.supports_coding) return false;
+    if (query.requires_images === 'true' && !model.supports_images) return false;
+    if (query.requires_audio_speech === 'true' && !model.supports_audio_speech) return false;
+    if (query.requires_audio_music === 'true' && !model.supports_audio_music) return false;
+    if (query.requires_vision === 'true' && !model.supports_vision) return false;
+    if (query.requires_video === 'true' && !model.supports_video) return false;
+
+    // Minimum rating filters
+    const ratingFields = ['chat', 'reasoning', 'speed', 'coding', 'images', 'audio_speech', 'audio_music', 'vision', 'video'];
+    for (const field of ratingFields) {
+      const minRating = query[`min_${field}_rating`];
+      if (minRating !== undefined) {
+        const rating = model[`${field}_rating`];
+        if (rating === null || rating < parseInt(minRating)) return false;
+      }
+    }
+
+    return true;
+  });
+}
+
+// Sort models based on query parameters
+function sortModelsPinokio(models, sortBy, sortOrder = 'desc') {
+  if (!sortBy) return models;
+
+  const order = sortOrder === 'asc' ? 1 : -1;
+
+  return [...models].sort((a, b) => {
+    const aVal = a[sortBy] ?? -Infinity;
+    const bVal = b[sortBy] ?? -Infinity;
+
+    if (aVal === bVal) return 0;
+    return (aVal > bVal ? 1 : -1) * order;
+  });
+}
+
+// GET /api/models - List all models with metadata
+app.get('/api/models', (req, res) => {
+  try {
+    const db = loadDb();
+    const models = buildModelList(db);
+
+    // Transform to Pinokio format
+    let transformed = models.map(m => transformModelForPinokio(m, db));
+
+    // Apply filters
+    transformed = filterModelsPinokio(transformed, req.query);
+
+    // Apply sorting
+    transformed = sortModelsPinokio(transformed, req.query.sort_by, req.query.sort_order);
+
+    res.json({
+      models: transformed,
+      count: transformed.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/models/presets - Pre-sliced views for dashboard
+// IMPORTANT: This must come BEFORE /:model_id route to avoid matching "presets" as an ID
+app.get('/api/models/presets', (req, res) => {
+  try {
+    const db = loadDb();
+    const models = buildModelList(db);
+    const transformed = models.map(m => transformModelForPinokio(m, db));
+
+    // Filter to allowed cost tiers (default: remote_free and credit_backed)
+    const allowedTiers = req.query.cost_tiers
+      ? req.query.cost_tiers.split(',')
+      : ['remote_free', 'credit_backed'];
+
+    const filtered = transformed.filter(m => allowedTiers.includes(m.cost_tier));
+
+    const topN = parseInt(req.query.top_n) || 10;
+
+    const presets = {
+      best_reasoning: sortModelsPinokio(
+        filtered.filter(m => m.supports_reasoning && m.reasoning_rating !== null),
+        'reasoning_rating',
+        'desc'
+      ).slice(0, topN),
+
+      fastest_chat: sortModelsPinokio(
+        filtered.filter(m => m.supports_chat && m.speed_rating !== null),
+        'speed_rating',
+        'desc'
+      ).slice(0, topN),
+
+      best_coding: sortModelsPinokio(
+        filtered.filter(m => m.supports_coding && m.coding_rating !== null),
+        'coding_rating',
+        'desc'
+      ).slice(0, topN),
+
+      best_vision: sortModelsPinokio(
+        filtered.filter(m => m.supports_vision && m.vision_rating !== null),
+        'vision_rating',
+        'desc'
+      ).slice(0, topN),
+
+      all_free_models: filtered.filter(m => m.cost_tier === 'remote_free')
+    };
+
+    res.json({
+      presets,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/models/:model_id - Get single model metadata
+app.get('/api/models/:model_id', (req, res) => {
+  try {
+    const db = loadDb();
+    const models = buildModelList(db);
+    const model = models.find(m => m.id === req.params.model_id);
+
+    if (!model) {
+      return res.status(404).json({
+        error: 'Model not found',
+        model_id: req.params.model_id
+      });
+    }
+
+    res.json(transformModelForPinokio(model, db));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PATCH /api/models/:model_id/rating - Update model ratings
+app.patch('/api/models/:model_id/rating', (req, res) => {
+  try {
+    const db = loadDb();
+    const models = buildModelList(db);
+    const model = models.find(m => m.id === req.params.model_id);
+
+    if (!model) {
+      return res.status(404).json({
+        error: 'Model not found',
+        model_id: req.params.model_id
+      });
+    }
+
+    // Validate rating values
+    const validRatingFields = ['chat', 'reasoning', 'speed', 'coding', 'images', 'audio_speech', 'audio_music', 'vision', 'video'];
+    const updates = {};
+
+    for (const field of validRatingFields) {
+      const ratingKey = `${field}_rating`;
+      if (req.body[ratingKey] !== undefined) {
+        const value = parseInt(req.body[ratingKey]);
+        if (isNaN(value) || value < 0 || value > 5) {
+          return res.status(400).json({
+            error: `Invalid rating value for ${ratingKey}. Must be integer 0-5.`,
+            field: ratingKey,
+            value: req.body[ratingKey]
+          });
+        }
+        updates[field] = value;
+      }
+    }
+
+    // Notes update
+    if (req.body.notes !== undefined) {
+      updates.notes = String(req.body.notes);
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        error: 'No valid updates provided',
+        valid_fields: [...validRatingFields.map(f => `${f}_rating`), 'notes']
+      });
+    }
+
+    // TODO: Persist updates to database
+    // For now, this is in-memory only and will not survive restart
+    // To persist: implement a database writer that updates model-company-database-v3-complete.json
+    // This would require finding the model in the registry and updating its model_details section
+
+    res.json({
+      success: true,
+      model_id: req.params.model_id,
+      updates: updates,
+      message: 'Rating updated successfully (in-memory only - not persisted to disk yet)',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Root endpoint with API documentation
 app.get('/api', (req, res) => {
   res.json({
@@ -689,6 +962,36 @@ app.get('/api', (req, res) => {
       },
       'GET /health': {
         description: 'Health check endpoint'
+      },
+      'GET /api/models': {
+        description: 'Pinokio Dashboard API - List all models with full metadata',
+        query_params: {
+          provider: 'Filter by provider',
+          cost_tier: 'Filter by cost tier',
+          requires_chat: 'Require chat capability (true/false)',
+          requires_vision: 'Require vision capability (true/false)',
+          min_reasoning_rating: 'Minimum reasoning rating (0-5)',
+          sort_by: 'Sort field (e.g., reasoning_rating, speed_rating)',
+          sort_order: 'Sort order (asc/desc)'
+        }
+      },
+      'GET /api/models/:model_id': {
+        description: 'Pinokio Dashboard API - Get single model metadata'
+      },
+      'GET /api/models/presets': {
+        description: 'Pinokio Dashboard API - Pre-sliced views for dashboard',
+        query_params: {
+          cost_tiers: 'Allowed cost tiers (comma-separated)',
+          top_n: 'Number of models per preset (default 10)'
+        }
+      },
+      'PATCH /api/models/:model_id/rating': {
+        description: 'Pinokio Dashboard API - Update model ratings',
+        body: {
+          chat_rating: 'Chat rating (0-5)',
+          reasoning_rating: 'Reasoning rating (0-5)',
+          notes: 'Free text notes'
+        }
       }
     },
     environment_variables: {

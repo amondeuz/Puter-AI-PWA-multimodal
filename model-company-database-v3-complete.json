@@ -1,10 +1,63 @@
 {
   "metadata": {
-    "version": "3.0.0",
-    "last_updated": "2025-11-30",
-    "description": "Complete AI Model to Company/Provider mapping - ALL 85 companies from Puter",
-    "total_companies": 85,
-    "total_models": 557
+    "version": "3.1.0",
+    "last_updated": "2025-12-04",
+    "description": "Complete AI Model to Company/Provider mapping with extended metadata for Turbo Console",
+    "total_companies": 86,
+    "total_models": 577
+  },
+  "free_models": [
+    "allam-2-7b",
+    "groq/compound",
+    "groq/compound-mini",
+    "llama-3.1-8b-instant",
+    "llama-3.3-70b-versatile",
+    "meta-llama/llama-4-maverick-17b-128e-instruct",
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "meta-llama/llama-guard-4-12b",
+    "meta-llama/llama-prompt-guard-2-22m",
+    "meta-llama/llama-prompt-guard-2-86m",
+    "moonshotai/kimi-k2-instruct",
+    "moonshotai/kimi-k2-instruct-0905",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-safeguard-20b",
+    "playai-tts",
+    "playai-tts-arabic",
+    "qwen/qwen3-32b",
+    "whisper-large-v3",
+    "whisper-large-v3-turbo"
+  ],
+  "free_models_metadata": {
+    "source": "groq_free_tier",
+    "last_updated": "2025-12-04",
+    "note": "Groq dev/free tier models with rate limits"
+  },
+  "pricing_registry": {
+    "openai": {
+      "standard": {
+        "text": {
+          "gpt-5.1-chat-latest": {
+            "input_per_million": 1.25,
+            "cached_per_million": 0.125,
+            "output_per_million": 10.0,
+            "notes": "OpenAI Standard tier as of 2024-12-18"
+          },
+          "gpt-4o-mini": {
+            "input_per_million": 0.15,
+            "cached_per_million": 0.075,
+            "output_per_million": 0.6,
+            "notes": "OpenAI Standard tier as of 2024-12-18"
+          }
+        }
+      }
+    },
+    "anthropic": {
+      "TODO_pricing": true
+    },
+    "google": {
+      "TODO_pricing": true
+    }
   },
   "model_registry": {
     "ai21": {
@@ -422,6 +475,106 @@
         "openrouter:google/gemma-3n-e4b-it:free"
       ],
       "total_models": 43
+    },
+    "groq": {
+      "company_name": "Groq",
+      "description": "GroqCloud free/dev tier models with fast inference",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [],
+      "groq": [
+        "allam-2-7b",
+        "groq/compound",
+        "groq/compound-mini",
+        "llama-3.1-8b-instant",
+        "llama-3.3-70b-versatile",
+        "meta-llama/llama-4-maverick-17b-128e-instruct",
+        "meta-llama/llama-4-scout-17b-16e-instruct",
+        "meta-llama/llama-guard-4-12b",
+        "meta-llama/llama-prompt-guard-2-22m",
+        "meta-llama/llama-prompt-guard-2-86m",
+        "moonshotai/kimi-k2-instruct",
+        "moonshotai/kimi-k2-instruct-0905",
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-safeguard-20b",
+        "qwen/qwen3-32b",
+        "whisper-large-v3",
+        "whisper-large-v3-turbo",
+        "playai-tts",
+        "playai-tts-arabic"
+      ],
+      "model_details": {
+        "llama-3.1-8b-instant": {
+          "display_name": "Llama 3.1 8B Instant",
+          "types": ["chat"],
+          "pricing_tier": "remote_free",
+          "source": "groq",
+          "rate_limits": {
+            "rpm": 30,
+            "rpd": 14400,
+            "tpm": 6000,
+            "tpd": 500000
+          },
+          "capabilities": {
+            "chat": true,
+            "reasoning": true,
+            "speed": true,
+            "coding": true,
+            "images": false,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 3,
+            "reasoning": 2,
+            "speed": 5,
+            "coding": 3,
+            "images": 0,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        },
+        "whisper-large-v3": {
+          "display_name": "Whisper Large V3",
+          "types": ["stt"],
+          "pricing_tier": "remote_free",
+          "source": "groq",
+          "rate_limits": {
+            "rpm": 20,
+            "rpd": 2000,
+            "audio_seconds_per_hour": 7200,
+            "audio_seconds_per_day": 28800
+          },
+          "capabilities": {
+            "chat": false,
+            "reasoning": false,
+            "speed": true,
+            "coding": false,
+            "images": false,
+            "audio_speech": true,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 0,
+            "reasoning": 0,
+            "speed": 5,
+            "coding": 0,
+            "images": 0,
+            "audio_speech": 4,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        }
+      },
+      "total_models": 20
     },
     "gryphe": {
       "company_name": "Gryphe",

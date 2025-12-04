@@ -1,10 +1,104 @@
 {
   "metadata": {
-    "version": "3.0.0",
-    "last_updated": "2025-11-30",
-    "description": "Complete AI Model to Company/Provider mapping - ALL 85 companies from Puter",
-    "total_companies": 85,
-    "total_models": 557
+    "version": "3.2.0",
+    "last_updated": "2025-12-04",
+    "description": "Complete AI Model to Company/Provider mapping with extended metadata for Turbo Console - All free tier providers integrated",
+    "total_companies": 90,
+    "total_models": 600,
+    "supported_providers": [
+      "groq",
+      "mistral",
+      "cerebras",
+      "cloudflare",
+      "huggingface",
+      "gemini",
+      "github",
+      "puter",
+      "openrouter",
+      "openai",
+      "anthropic"
+    ]
+  },
+  "free_models": [
+    "allam-2-7b",
+    "groq/compound",
+    "groq/compound-mini",
+    "llama-3.1-8b-instant",
+    "llama-3.3-70b-versatile",
+    "meta-llama/llama-4-maverick-17b-128e-instruct",
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "meta-llama/llama-guard-4-12b",
+    "meta-llama/llama-prompt-guard-2-22m",
+    "meta-llama/llama-prompt-guard-2-86m",
+    "moonshotai/kimi-k2-instruct",
+    "moonshotai/kimi-k2-instruct-0905",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-safeguard-20b",
+    "playai-tts",
+    "playai-tts-arabic",
+    "qwen/qwen3-32b",
+    "whisper-large-v3",
+    "whisper-large-v3-turbo",
+    "mistral-small-latest",
+    "pixtral-12b-2409",
+    "llama3.1-8b",
+    "llama3.1-70b",
+    "llama3.3-70b",
+    "@cf/meta/llama-3.1-8b-instruct",
+    "@cf/meta/llama-3.2-1b-instruct",
+    "@cf/meta/llama-3.2-3b-instruct",
+    "@cf/qwen/qwen1.5-7b-chat-awq",
+    "@cf/microsoft/phi-2",
+    "gemini-2.0-flash-exp",
+    "gemini-1.5-flash",
+    "gpt-4o",
+    "gpt-4o-mini",
+    "meta-llama-3.1-405b-instruct",
+    "meta-llama-3.1-70b-instruct",
+    "meta-llama-3.1-8b-instruct",
+    "mistral-large-2407",
+    "mistral-small",
+    "phi-3.5-mini-instruct",
+    "phi-3.5-moe-instruct"
+  ],
+  "free_models_metadata": {
+    "sources": [
+      "groq_free_tier",
+      "mistral_free_tier",
+      "cerebras_free_tier",
+      "cloudflare_free_tier",
+      "gemini_free_tier",
+      "github_models_beta"
+    ],
+    "last_updated": "2025-12-04",
+    "note": "Free tier models from multiple providers - Groq, Mistral, Cerebras, Cloudflare, Gemini, GitHub Models. Puter models use credit_backed tier."
+  },
+  "pricing_registry": {
+    "openai": {
+      "standard": {
+        "text": {
+          "gpt-5.1-chat-latest": {
+            "input_per_million": 1.25,
+            "cached_per_million": 0.125,
+            "output_per_million": 10.0,
+            "notes": "OpenAI Standard tier as of 2024-12-18"
+          },
+          "gpt-4o-mini": {
+            "input_per_million": 0.15,
+            "cached_per_million": 0.075,
+            "output_per_million": 0.6,
+            "notes": "OpenAI Standard tier as of 2024-12-18"
+          }
+        }
+      }
+    },
+    "anthropic": {
+      "TODO_pricing": true
+    },
+    "google": {
+      "TODO_pricing": true
+    }
   },
   "model_registry": {
     "ai21": {
@@ -421,7 +515,182 @@
         "openrouter:google/gemma-3n-e4b-it",
         "openrouter:google/gemma-3n-e4b-it:free"
       ],
-      "total_models": 43
+      "groq": [],
+      "mistral": [],
+      "cerebras": [],
+      "cloudflare": [],
+      "huggingface": [],
+      "gemini": [
+        "gemini-2.0-flash-exp",
+        "gemini-1.5-flash"
+      ],
+      "github": [],
+      "puter": [],
+      "model_details": {
+        "gemini-2.0-flash-exp": {
+          "display_name": "Gemini 2.0 Flash Experimental",
+          "types": ["chat"],
+          "cost_tier": "remote_free",
+          "provider": "gemini",
+          "route": "gemini",
+          "rate_limits": null,
+          "rate_limit_source": "https://ai.google.dev/pricing - check current free tier limits",
+          "capabilities": {
+            "chat": true,
+            "reasoning": true,
+            "speed": true,
+            "coding": true,
+            "images": false,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 4,
+            "reasoning": 4,
+            "speed": 5,
+            "coding": 4,
+            "images": 0,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        },
+        "gemini-1.5-flash": {
+          "display_name": "Gemini 1.5 Flash",
+          "types": ["chat"],
+          "cost_tier": "remote_free",
+          "provider": "gemini",
+          "route": "gemini",
+          "rate_limits": null,
+          "rate_limit_source": "https://ai.google.dev/pricing - check current free tier limits",
+          "capabilities": {
+            "chat": true,
+            "reasoning": true,
+            "speed": true,
+            "coding": true,
+            "images": false,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 4,
+            "reasoning": 3,
+            "speed": 5,
+            "coding": 4,
+            "images": 0,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        }
+      },
+      "total_models": 45
+    },
+    "groq": {
+      "company_name": "Groq",
+      "description": "GroqCloud free/dev tier models with fast inference",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [],
+      "groq": [
+        "allam-2-7b",
+        "groq/compound",
+        "groq/compound-mini",
+        "llama-3.1-8b-instant",
+        "llama-3.3-70b-versatile",
+        "meta-llama/llama-4-maverick-17b-128e-instruct",
+        "meta-llama/llama-4-scout-17b-16e-instruct",
+        "meta-llama/llama-guard-4-12b",
+        "meta-llama/llama-prompt-guard-2-22m",
+        "meta-llama/llama-prompt-guard-2-86m",
+        "moonshotai/kimi-k2-instruct",
+        "moonshotai/kimi-k2-instruct-0905",
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-safeguard-20b",
+        "qwen/qwen3-32b",
+        "whisper-large-v3",
+        "whisper-large-v3-turbo",
+        "playai-tts",
+        "playai-tts-arabic"
+      ],
+      "model_details": {
+        "llama-3.1-8b-instant": {
+          "display_name": "Llama 3.1 8B Instant",
+          "types": ["chat"],
+          "pricing_tier": "remote_free",
+          "source": "groq",
+          "rate_limits": {
+            "rpm": 30,
+            "rpd": 14400,
+            "tpm": 6000,
+            "tpd": 500000
+          },
+          "capabilities": {
+            "chat": true,
+            "reasoning": true,
+            "speed": true,
+            "coding": true,
+            "images": false,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 3,
+            "reasoning": 2,
+            "speed": 5,
+            "coding": 3,
+            "images": 0,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        },
+        "whisper-large-v3": {
+          "display_name": "Whisper Large V3",
+          "types": ["stt"],
+          "pricing_tier": "remote_free",
+          "source": "groq",
+          "rate_limits": {
+            "rpm": 20,
+            "rpd": 2000,
+            "audio_seconds_per_hour": 7200,
+            "audio_seconds_per_day": 28800
+          },
+          "capabilities": {
+            "chat": false,
+            "reasoning": false,
+            "speed": true,
+            "coding": false,
+            "images": false,
+            "audio_speech": true,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 0,
+            "reasoning": 0,
+            "speed": 5,
+            "coding": 0,
+            "images": 0,
+            "audio_speech": 4,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        }
+      },
+      "total_models": 20
     },
     "gryphe": {
       "company_name": "Gryphe",
@@ -728,7 +997,82 @@
       ],
       "togetherai": [],
       "openrouter": [],
-      "total_models": 35
+      "groq": [],
+      "mistral": [
+        "mistral-small-latest",
+        "pixtral-12b-2409"
+      ],
+      "cerebras": [],
+      "cloudflare": [],
+      "huggingface": [],
+      "gemini": [],
+      "github": [],
+      "puter": [],
+      "model_details": {
+        "mistral-small-latest": {
+          "display_name": "Mistral Small Latest",
+          "types": ["chat"],
+          "cost_tier": "remote_free",
+          "provider": "mistral",
+          "route": "mistral",
+          "rate_limits": null,
+          "rate_limit_source": "https://console.mistral.ai - check user console for current limits",
+          "capabilities": {
+            "chat": true,
+            "reasoning": true,
+            "speed": true,
+            "coding": true,
+            "images": false,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 4,
+            "reasoning": 3,
+            "speed": 4,
+            "coding": 4,
+            "images": 0,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        },
+        "pixtral-12b-2409": {
+          "display_name": "Pixtral 12B",
+          "types": ["chat", "vision"],
+          "cost_tier": "remote_free",
+          "provider": "mistral",
+          "route": "mistral",
+          "rate_limits": null,
+          "rate_limit_source": "https://console.mistral.ai - check user console for current limits",
+          "capabilities": {
+            "chat": true,
+            "reasoning": true,
+            "speed": true,
+            "coding": true,
+            "images": false,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": true,
+            "video": false
+          },
+          "ratings": {
+            "chat": 4,
+            "reasoning": 3,
+            "speed": 4,
+            "coding": 3,
+            "images": 0,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 4,
+            "video": 0
+          }
+        }
+      },
+      "total_models": 37
     },
     "mistralai": {
       "company_name": "Mistral AI",
@@ -1342,6 +1686,261 @@
       ],
       "openrouter": [],
       "total_models": 2
+    },
+    "cerebras": {
+      "company_name": "Cerebras",
+      "description": "Cerebras Inference - free tier with Llama models",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [],
+      "groq": [],
+      "mistral": [],
+      "cerebras": [
+        "llama3.1-8b",
+        "llama3.1-70b",
+        "llama3.3-70b"
+      ],
+      "cloudflare": [],
+      "huggingface": [],
+      "gemini": [],
+      "github": [],
+      "puter": [],
+      "model_details": {
+        "llama3.1-8b": {
+          "display_name": "Llama 3.1 8B",
+          "types": ["chat"],
+          "cost_tier": "remote_free",
+          "provider": "cerebras",
+          "route": "cerebras",
+          "rate_limits": null,
+          "rate_limit_source": "https://inference-docs.cerebras.ai - check user console for current limits",
+          "capabilities": {
+            "chat": true,
+            "reasoning": true,
+            "speed": true,
+            "coding": true,
+            "images": false,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 3,
+            "reasoning": 2,
+            "speed": 5,
+            "coding": 3,
+            "images": 0,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        }
+      },
+      "total_models": 3
+    },
+    "cloudflare": {
+      "company_name": "Cloudflare",
+      "description": "Cloudflare Workers AI - 10,000 neurons/day free tier",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [],
+      "groq": [],
+      "mistral": [],
+      "cerebras": [],
+      "cloudflare": [
+        "@cf/meta/llama-3.1-8b-instruct",
+        "@cf/meta/llama-3.2-1b-instruct",
+        "@cf/meta/llama-3.2-3b-instruct",
+        "@cf/qwen/qwen1.5-7b-chat-awq",
+        "@cf/microsoft/phi-2"
+      ],
+      "huggingface": [],
+      "gemini": [],
+      "github": [],
+      "puter": [],
+      "model_details": {
+        "@cf/meta/llama-3.1-8b-instruct": {
+          "display_name": "Llama 3.1 8B Instruct",
+          "types": ["chat"],
+          "cost_tier": "remote_free",
+          "provider": "cloudflare",
+          "route": "cloudflare",
+          "rate_limits": {
+            "neurons_per_day": 10000
+          },
+          "rate_limit_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+          "capabilities": {
+            "chat": true,
+            "reasoning": true,
+            "speed": true,
+            "coding": true,
+            "images": false,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 3,
+            "reasoning": 2,
+            "speed": 4,
+            "coding": 3,
+            "images": 0,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        }
+      },
+      "total_models": 5
+    },
+    "github-models": {
+      "company_name": "GitHub",
+      "description": "GitHub Models - free while in beta",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [],
+      "groq": [],
+      "mistral": [],
+      "cerebras": [],
+      "cloudflare": [],
+      "huggingface": [],
+      "gemini": [],
+      "github": [
+        "gpt-4o",
+        "gpt-4o-mini",
+        "meta-llama-3.1-405b-instruct",
+        "meta-llama-3.1-70b-instruct",
+        "meta-llama-3.1-8b-instruct",
+        "mistral-large-2407",
+        "mistral-small",
+        "phi-3.5-mini-instruct",
+        "phi-3.5-moe-instruct"
+      ],
+      "puter": [],
+      "model_details": {
+        "gpt-4o-mini": {
+          "display_name": "GPT-4o Mini",
+          "types": ["chat"],
+          "cost_tier": "remote_free",
+          "provider": "github",
+          "route": "github",
+          "rate_limits": null,
+          "rate_limit_source": "https://docs.github.com/en/github-models/prototyping-with-ai-models - free during beta, check for limits",
+          "capabilities": {
+            "chat": true,
+            "reasoning": true,
+            "speed": true,
+            "coding": true,
+            "images": false,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 4,
+            "reasoning": 3,
+            "speed": 5,
+            "coding": 4,
+            "images": 0,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        }
+      },
+      "total_models": 9
+    },
+    "puter": {
+      "company_name": "Puter",
+      "description": "Puter OS built-in AI - free via Puter SDK",
+      "direct_api": [],
+      "togetherai": [],
+      "openrouter": [],
+      "groq": [],
+      "mistral": [],
+      "cerebras": [],
+      "cloudflare": [],
+      "huggingface": [],
+      "gemini": [],
+      "github": [],
+      "puter": [
+        "puter-chat",
+        "puter-txt2img",
+        "puter-completion"
+      ],
+      "model_details": {
+        "puter-chat": {
+          "display_name": "Puter Chat",
+          "types": ["chat"],
+          "cost_tier": "credit_backed",
+          "provider": "puter",
+          "route": "puter",
+          "uses_puter_credits": true,
+          "rate_limits": null,
+          "rate_limit_source": "Uses Puter credits - check puter.com docs",
+          "capabilities": {
+            "chat": true,
+            "reasoning": true,
+            "speed": true,
+            "coding": true,
+            "images": false,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 3,
+            "reasoning": 2,
+            "speed": 4,
+            "coding": 3,
+            "images": 0,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        },
+        "puter-txt2img": {
+          "display_name": "Puter Text to Image",
+          "types": ["image"],
+          "cost_tier": "credit_backed",
+          "provider": "puter",
+          "route": "puter",
+          "uses_puter_credits": true,
+          "rate_limits": null,
+          "rate_limit_source": "Uses Puter credits - check puter.com docs",
+          "capabilities": {
+            "chat": false,
+            "reasoning": false,
+            "speed": true,
+            "coding": false,
+            "images": true,
+            "audio_speech": false,
+            "audio_music": false,
+            "vision": false,
+            "video": false
+          },
+          "ratings": {
+            "chat": 0,
+            "reasoning": 0,
+            "speed": 3,
+            "coding": 0,
+            "images": 3,
+            "audio_speech": 0,
+            "audio_music": 0,
+            "vision": 0,
+            "video": 0
+          }
+        }
+      },
+      "total_models": 3
     }
   },
   "company_patterns": {

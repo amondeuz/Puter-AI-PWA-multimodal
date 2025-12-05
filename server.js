@@ -113,6 +113,124 @@ function parseRateLimitHeaders(headers, provider) {
 // In-memory rate limit cache (key: "provider:model_id", value: parsed limits)
 const rateLimitCache = {};
 
+// ============================================================================
+// RATINGS PERSISTENCE
+// ============================================================================
+
+const RATINGS_FILE = path.join(__dirname, 'ratings-overrides.json');
+
+function loadRatingsOverrides() {
+  try {
+    if (fs.existsSync(RATINGS_FILE)) {
+      return JSON.parse(fs.readFileSync(RATINGS_FILE, 'utf8'));
+    }
+  } catch (e) {
+    console.warn('Could not load ratings overrides:', e.message);
+  }
+  return {};
+}
+
+function saveRatingsOverrides(overrides) {
+  fs.writeFileSync(RATINGS_FILE, JSON.stringify(overrides, null, 2));
+}
+
+// Load ratings overrides on startup
+let ratingsOverrides = loadRatingsOverrides();
+
+// ============================================================================
+// PROVIDER HEALTH TRACKING
+// ============================================================================
+
+// In-memory provider health tracking (last 100 calls per provider)
+const providerHealthHistory = {};
+const MAX_HISTORY_PER_PROVIDER = 100;
+
+function recordProviderHealth(provider, modelId, success, latencyMs, errorMessage) {
+  if (!providerHealthHistory[provider]) {
+    providerHealthHistory[provider] = [];
+  }
+
+  providerHealthHistory[provider].push({
+    model_id: modelId,
+    success: success,
+    latency_ms: latencyMs,
+    error_message: errorMessage,
+    timestamp: new Date().toISOString()
+  });
+
+  // Keep only last MAX_HISTORY_PER_PROVIDER entries
+  if (providerHealthHistory[provider].length > MAX_HISTORY_PER_PROVIDER) {
+    providerHealthHistory[provider].shift();
+  }
+}
+
+function getProviderHealthStatus(provider, db) {
+  const history = providerHealthHistory[provider] || [];
+
+  if (history.length === 0) {
+    return {
+      provider: provider,
+      status: 'unknown',
+      latency_ms: null,
+      last_checked: null,
+      last_success: null,
+      last_error: null,
+      error_count_last_hour: 0,
+      success_rate_last_hour: null,
+      models_available: buildModelList(db).filter(m => m.provider === provider).length
+    };
+  }
+
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const recentHistory = history.filter(h => new Date(h.timestamp) > oneHourAgo);
+  const lastCall = history[history.length - 1];
+  const lastSuccess = [...history].reverse().find(h => h.success);
+
+  const successCount = recentHistory.filter(h => h.success).length;
+  const totalCount = recentHistory.length;
+  const successRate = totalCount > 0 ? successCount / totalCount : null;
+  const errorCount = recentHistory.filter(h => !h.success).length;
+
+  // Calculate average latency from successful calls
+  const successfulCalls = recentHistory.filter(h => h.success && h.latency_ms);
+  const avgLatency = successfulCalls.length > 0
+    ? Math.round(successfulCalls.reduce((sum, h) => sum + h.latency_ms, 0) / successfulCalls.length)
+    : null;
+
+  // Determine status
+  let status = 'unknown';
+  if (totalCount > 0) {
+    if (successRate >= 0.95 && (avgLatency === null || avgLatency < 2000)) {
+      status = 'healthy';
+    } else if (successRate >= 0.5 && (avgLatency === null || avgLatency < 5000)) {
+      status = 'degraded';
+    } else {
+      status = 'down';
+    }
+
+    // Check if last success was too long ago
+    if (lastSuccess) {
+      const lastSuccessTime = new Date(lastSuccess.timestamp).getTime();
+      const fifteenMinutesAgo = Date.now() - 15 * 60 * 1000;
+      if (lastSuccessTime < fifteenMinutesAgo && totalCount > 5) {
+        status = 'down';
+      }
+    }
+  }
+
+  return {
+    provider: provider,
+    status: status,
+    latency_ms: avgLatency,
+    last_checked: lastCall?.timestamp || null,
+    last_success: lastSuccess?.timestamp || null,
+    last_error: lastCall?.success === false ? lastCall.error_message : null,
+    error_count_last_hour: errorCount,
+    success_rate_last_hour: successRate,
+    models_available: buildModelList(db).filter(m => m.provider === provider).length
+  };
+}
+
 // Check if a model is usable for current Puter account
 async function isModelUsable(model, db) {
   const modelId = model.id;
@@ -295,6 +413,10 @@ function parseRouteKey(routeKey) {
       return { provider: 'gemini', route: 'gemini' };
     case 'github':
       return { provider: 'github', route: 'github' };
+    case 'cohere':
+      return { provider: 'cohere', route: 'cohere' };
+    case 'perplexity':
+      return { provider: 'perplexity', route: 'perplexity' };
     case 'puter':
       return { provider: 'puter', route: 'puter' };
     case 'direct_api':
@@ -337,6 +459,8 @@ function buildModelList(db) {
       'huggingface',
       'gemini',
       'github',
+      'cohere',
+      'perplexity',
       'puter'
     ];
     buckets.forEach((bucket) => {
@@ -431,7 +555,10 @@ async function callGroq(model, input) {
     throw new Error(`Groq API error: ${response.status} - ${error}`);
   }
 
-  return await response.json();
+  return {
+    data: await response.json(),
+    headers: response.headers
+  };
 }
 
 async function callMistral(model, input) {
@@ -459,7 +586,10 @@ async function callMistral(model, input) {
     throw new Error(`Mistral API error: ${response.status} - ${error}`);
   }
 
-  return await response.json();
+  return {
+    data: await response.json(),
+    headers: response.headers
+  };
 }
 
 async function callOpenRouter(model, input) {
@@ -489,7 +619,10 @@ async function callOpenRouter(model, input) {
     throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
   }
 
-  return await response.json();
+  return {
+    data: await response.json(),
+    headers: response.headers
+  };
 }
 
 async function callCerebras(model, input) {
@@ -517,7 +650,10 @@ async function callCerebras(model, input) {
     throw new Error(`Cerebras API error: ${response.status} - ${error}`);
   }
 
-  return await response.json();
+  return {
+    data: await response.json(),
+    headers: response.headers
+  };
 }
 
 async function callCloudflare(model, input) {
@@ -549,7 +685,10 @@ async function callCloudflare(model, input) {
     throw new Error(`Cloudflare API error: ${response.status} - ${error}`);
   }
 
-  return await response.json();
+  return {
+    data: await response.json(),
+    headers: response.headers
+  };
 }
 
 async function callHuggingFace(model, input) {
@@ -578,7 +717,10 @@ async function callHuggingFace(model, input) {
     throw new Error(`Hugging Face API error: ${response.status} - ${error}`);
   }
 
-  return await response.json();
+  return {
+    data: await response.json(),
+    headers: response.headers
+  };
 }
 
 async function callGemini(model, input) {
@@ -614,7 +756,10 @@ async function callGemini(model, input) {
     throw new Error(`Gemini API error: ${response.status} - ${error}`);
   }
 
-  return await response.json();
+  return {
+    data: await response.json(),
+    headers: response.headers
+  };
 }
 
 async function callGitHub(model, input) {
@@ -642,7 +787,74 @@ async function callGitHub(model, input) {
     throw new Error(`GitHub Models API error: ${response.status} - ${error}`);
   }
 
-  return await response.json();
+  return {
+    data: await response.json(),
+    headers: response.headers
+  };
+}
+
+async function callCohere(model, input) {
+  const apiKey = process.env.COHERE_API_KEY;
+  if (!apiKey) {
+    throw new Error('COHERE_API_KEY not configured');
+  }
+
+  const messages = input.messages || [{ role: 'user', content: input.input || input.prompt || '' }];
+
+  const response = await fetch('https://api.cohere.com/v2/chat', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: model.id,
+      messages: messages,
+      temperature: input.temperature || 0.7,
+      max_tokens: input.max_tokens || 1024
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Cohere API error: ${response.status} - ${error}`);
+  }
+
+  return {
+    data: await response.json(),
+    headers: response.headers
+  };
+}
+
+async function callPerplexity(model, input) {
+  const apiKey = process.env.PERPLEXITY_API_KEY;
+  if (!apiKey) {
+    throw new Error('PERPLEXITY_API_KEY not configured');
+  }
+
+  const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: model.id,
+      messages: input.messages || [{ role: 'user', content: input.input || input.prompt || '' }],
+      temperature: input.temperature || 0.7,
+      max_tokens: input.max_tokens || 1024
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Perplexity API error: ${response.status} - ${error}`);
+  }
+
+  return {
+    data: await response.json(),
+    headers: response.headers
+  };
 }
 
 async function callPuter(model, input) {
@@ -661,8 +873,11 @@ async function callPuter(model, input) {
   if (model.capabilities?.images) {
     const result = await puter.ai.txt2img(prompt);
     return {
-      choices: [{ message: { content: result } }],
-      usage: { total_tokens: 0 }
+      data: {
+        choices: [{ message: { content: result } }],
+        usage: { total_tokens: 0 }
+      },
+      headers: new Headers()  // Puter SDK doesn't provide headers
     };
   } else {
     const result = await puter.ai.chat(prompt, {
@@ -670,8 +885,11 @@ async function callPuter(model, input) {
       temperature: input.temperature || 0.7
     });
     return {
-      choices: [{ message: { content: result } }],
-      usage: { total_tokens: 0 }
+      data: {
+        choices: [{ message: { content: result } }],
+        usage: { total_tokens: 0 }
+      },
+      headers: new Headers()  // Puter SDK doesn't provide headers
     };
   }
 }
@@ -703,7 +921,10 @@ async function callDirect(model, input) {
       throw new Error(`OpenAI API error: ${response.status} - ${error}`);
     }
 
-    return await response.json();
+    return {
+      data: await response.json(),
+      headers: response.headers
+    };
   }
 
   if (provider === 'anthropic') {
@@ -731,7 +952,10 @@ async function callDirect(model, input) {
       throw new Error(`Anthropic API error: ${response.status} - ${error}`);
     }
 
-    return await response.json();
+    return {
+      data: await response.json(),
+      headers: response.headers
+    };
   }
 
   throw new Error(`Direct API for provider "${provider}" not yet implemented`);
@@ -739,31 +963,72 @@ async function callDirect(model, input) {
 
 async function callProvider(model, input) {
   const route = model.route || model.provider;
+  const startTime = Date.now();
+  let result;
+  let success = true;
+  let errorMessage = null;
 
-  switch (route) {
-    case 'groq':
-      return await callGroq(model, input);
-    case 'mistral':
-      return await callMistral(model, input);
-    case 'openrouter':
-      return await callOpenRouter(model, input);
-    case 'cerebras':
-      return await callCerebras(model, input);
-    case 'cloudflare':
-      return await callCloudflare(model, input);
-    case 'huggingface':
-      return await callHuggingFace(model, input);
-    case 'gemini':
-      return await callGemini(model, input);
-    case 'github':
-      return await callGitHub(model, input);
-    case 'puter':
-      return await callPuter(model, input);
-    case 'direct':
-      return await callDirect(model, input);
-    default:
-      throw new Error(`Provider route "${route}" not implemented`);
+  try {
+    switch (route) {
+      case 'groq':
+        result = await callGroq(model, input);
+        break;
+      case 'mistral':
+        result = await callMistral(model, input);
+        break;
+      case 'openrouter':
+        result = await callOpenRouter(model, input);
+        break;
+      case 'cerebras':
+        result = await callCerebras(model, input);
+        break;
+      case 'cloudflare':
+        result = await callCloudflare(model, input);
+        break;
+      case 'huggingface':
+        result = await callHuggingFace(model, input);
+        break;
+      case 'gemini':
+        result = await callGemini(model, input);
+        break;
+      case 'github':
+        result = await callGitHub(model, input);
+        break;
+      case 'cohere':
+        result = await callCohere(model, input);
+        break;
+      case 'perplexity':
+        result = await callPerplexity(model, input);
+        break;
+      case 'puter':
+        result = await callPuter(model, input);
+        break;
+      case 'direct':
+        result = await callDirect(model, input);
+        break;
+      default:
+        throw new Error(`Provider route "${route}" not implemented`);
+    }
+  } catch (error) {
+    success = false;
+    errorMessage = error.message;
+    throw error; // Re-throw after recording
+  } finally {
+    const latencyMs = Date.now() - startTime;
+    recordProviderHealth(route, model.id, success, latencyMs, errorMessage);
   }
+
+  // Parse and cache rate limit headers
+  if (result.headers) {
+    const limits = parseRateLimitHeaders(result.headers, route);
+    const cacheKey = `${route}:${model.id}`;
+    rateLimitCache[cacheKey] = {
+      ...limits,
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  return result.data;
 }
 
 // ============================================================================
@@ -864,12 +1129,8 @@ app.post('/run', async (req, res) => {
       });
     }
 
-    // Make actual provider call
+    // Make actual provider call (rate limits are now automatically captured and cached)
     const providerResponse = await callProvider(selected, req.body);
-
-    // TODO: Capture rate limit headers from providerResponse if available
-    // For now, we'd need to modify callProvider to return headers as well
-    // This would require changing all provider functions to return { data, headers }
 
     // Check boost tier exhaustion after call
     let exhaustionCheck = null;
@@ -899,8 +1160,35 @@ app.post('/run', async (req, res) => {
       boost_tier_message: exhaustionCheck?.message || null
     });
   } catch (error) {
-    res.status(500).json({
+    const isRateLimit = error.message.includes('rate') || error.message.includes('429') || error.message.includes('Rate');
+
+    let suggestion = null;
+    const selected = req.body.model_id ? models.find(m => m.id === req.body.model_id) : null;
+
+    if (isRateLimit && selected) {
+      // Find alternative model with same capability
+      const capability = req.body.capability || 'chat';
+      const alternatives = suggestModels(models, {
+        capability: capability,
+        max_cost_tier: req.body.max_cost_tier || 'remote_free'
+      }).filter(m => m.id !== selected.id && m.provider !== selected.provider);
+
+      if (alternatives.length > 0) {
+        suggestion = {
+          next_best_model: alternatives[0].id,
+          next_best_provider: alternatives[0].provider,
+          reason: 'Same capability, different provider'
+        };
+      }
+    }
+
+    res.status(isRateLimit ? 429 : 500).json({
       error: error.message,
+      error_type: isRateLimit ? 'rate_limit_exceeded' : 'provider_error',
+      provider: selected?.provider,
+      model_id: selected?.id,
+      retry_after_seconds: isRateLimit ? 60 : null,
+      suggestion,
       metadata: {
         execution_time_ms: Date.now() - startTime,
         timestamp: new Date().toISOString()
@@ -1043,6 +1331,174 @@ app.post('/preflight', async (req, res) => {
   }
 });
 
+// POST /api/preflight/batch - Check if multiple tasks can run with current account status
+app.post('/api/preflight/batch', async (req, res) => {
+  try {
+    const { boost_tier, tasks } = req.body;
+
+    if (!boost_tier || !['turbo', 'ultra'].includes(boost_tier)) {
+      return res.status(400).json({
+        error: 'boost_tier is required and must be "turbo" or "ultra"'
+      });
+    }
+
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      return res.status(400).json({
+        error: 'tasks must be a non-empty array'
+      });
+    }
+
+    if (tasks.length > 20) {
+      return res.status(400).json({
+        error: 'Maximum 20 tasks per batch preflight check'
+      });
+    }
+
+    const db = loadDb();
+    const costTier = boostTierToCostTier(boost_tier);
+    let allModels = buildModelList(db).filter(m => m.cost_tier === costTier);
+
+    const results = [];
+    let totalTokens = 0;
+
+    // Track simulated consumption per provider during batch check
+    const simulatedUsage = {};
+
+    for (let i = 0; i < tasks.length; i++) {
+      const task = tasks[i];
+      totalTokens += task.estimated_tokens || 0;
+
+      // Find candidate models for this task
+      let candidates = allModels;
+
+      if (task.model_id) {
+        candidates = candidates.filter(m => m.id === task.model_id);
+      }
+      if (task.provider) {
+        candidates = candidates.filter(m => m.provider === task.provider);
+      }
+      if (task.capability) {
+        candidates = candidates.filter(m => m.capabilities?.[task.capability]);
+      }
+
+      // Sort by rating for the requested capability
+      candidates = suggestModels(candidates, {
+        capability: task.capability || 'chat',
+        max_cost_tier: costTier
+      });
+
+      if (candidates.length === 0) {
+        results.push({
+          task_index: i,
+          can_run: false,
+          reason: `No ${task.capability || 'chat'} models available in ${boost_tier} tier` +
+                  (task.provider ? ` from ${task.provider}` : ''),
+          suggested_model: undefined,
+          suggested_provider: undefined
+        });
+        continue;
+      }
+
+      // Check rate limits for top candidate
+      let foundUsable = false;
+      for (const candidate of candidates) {
+        const cacheKey = `${candidate.provider}:${candidate.id}`;
+        const cached = rateLimitCache[cacheKey];
+        const staticLimits = candidate.limits || {};
+
+        // Get current limits (prefer cached real-time data)
+        const requestsRemaining = cached?.requests_remaining ?? staticLimits.rpm ?? 999;
+        const tokensRemaining = cached?.tokens_remaining ?? staticLimits.tpm ?? 999999;
+
+        // Account for simulated usage from earlier tasks in this batch
+        const providerKey = candidate.provider;
+        const simulated = simulatedUsage[providerKey] || { requests: 0, tokens: 0 };
+
+        const effectiveRequestsRemaining = requestsRemaining - simulated.requests;
+        const effectiveTokensRemaining = tokensRemaining - simulated.tokens;
+
+        const taskTokens = task.estimated_tokens || 500; // Default estimate
+
+        if (effectiveRequestsRemaining > 0 && effectiveTokensRemaining >= taskTokens) {
+          // Can run - update simulated usage
+          simulatedUsage[providerKey] = {
+            requests: simulated.requests + 1,
+            tokens: simulated.tokens + taskTokens
+          };
+
+          results.push({
+            task_index: i,
+            can_run: true,
+            reason: task.model_id ? 'Requested model available' : 'Within rate limits',
+            suggested_model: candidate.id,
+            suggested_provider: candidate.provider
+          });
+          foundUsable = true;
+          break;
+        }
+      }
+
+      if (!foundUsable) {
+        // All candidates exhausted - find alternative from different provider
+        const exhaustedProviders = candidates.map(c => c.provider);
+        const alternatives = allModels.filter(m =>
+          !exhaustedProviders.includes(m.provider) &&
+          m.capabilities?.[task.capability || 'chat']
+        );
+
+        const resetTime = rateLimitCache[`${candidates[0].provider}:${candidates[0].id}`]?.reset_time;
+        const waitSeconds = resetTime ? Math.max(0, Math.ceil((new Date(resetTime).getTime() - Date.now()) / 1000)) : 60;
+
+        results.push({
+          task_index: i,
+          can_run: false,
+          reason: `Provider ${candidates[0].provider} rate limited`,
+          suggested_model: alternatives[0]?.id,
+          suggested_provider: alternatives[0]?.provider,
+          estimated_wait_seconds: waitSeconds
+        });
+      }
+    }
+
+    const tasksRunnable = results.filter(r => r.can_run).length;
+    const tasksBlocked = results.filter(r => !r.can_run).length;
+
+    // Generate recommendation
+    let recommendation = '';
+    if (tasksBlocked === 0) {
+      recommendation = `All ${tasks.length} tasks can run immediately.`;
+    } else if (tasksRunnable === 0) {
+      recommendation = `All tasks blocked. Consider switching boost tier or waiting for rate limits to reset.`;
+    } else {
+      const blockedWithAlt = results.filter(r => !r.can_run && r.suggested_provider);
+      const minWait = Math.min(...results.filter(r => r.estimated_wait_seconds).map(r => r.estimated_wait_seconds));
+      recommendation = `${tasksRunnable} of ${tasks.length} tasks can run immediately.`;
+      if (blockedWithAlt.length > 0) {
+        recommendation += ` ${blockedWithAlt.length} task(s) have alternative providers available.`;
+      }
+      if (minWait && minWait < 120) {
+        recommendation += ` Wait ${minWait}s for rate limits to reset.`;
+      }
+    }
+
+    res.json({
+      batch_can_run: tasksBlocked === 0,
+      tasks_runnable: tasksRunnable,
+      tasks_blocked: tasksBlocked,
+      total_estimated_tokens: totalTokens,
+      results,
+      recommendation,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
@@ -1061,6 +1517,7 @@ app.get('/health', (req, res) => {
 function transformModelForPinokio(model, db) {
   const details = db.model_details?.[model.id] || {};
   const limits = model.limits || details.rate_limits || {};
+  const overrides = ratingsOverrides[model.id] || {};
 
   return {
     model_id: model.id,
@@ -1079,16 +1536,16 @@ function transformModelForPinokio(model, db) {
     supports_vision: Boolean(model.capabilities?.vision),
     supports_video: Boolean(model.capabilities?.video),
 
-    // Ratings (0-5 stars, nullable)
-    chat_rating: model.ratings?.chat ?? null,
-    reasoning_rating: model.ratings?.reasoning ?? null,
-    speed_rating: model.ratings?.speed ?? null,
-    coding_rating: model.ratings?.coding ?? null,
-    images_rating: model.ratings?.images ?? null,
-    audio_speech_rating: model.ratings?.audio_speech ?? null,
-    audio_music_rating: model.ratings?.audio_music ?? null,
-    vision_rating: model.ratings?.vision ?? null,
-    video_rating: model.ratings?.video ?? null,
+    // Ratings (0-5 stars, nullable) - apply overrides
+    chat_rating: overrides.chat ?? model.ratings?.chat ?? null,
+    reasoning_rating: overrides.reasoning ?? model.ratings?.reasoning ?? null,
+    speed_rating: overrides.speed ?? model.ratings?.speed ?? null,
+    coding_rating: overrides.coding ?? model.ratings?.coding ?? null,
+    images_rating: overrides.images ?? model.ratings?.images ?? null,
+    audio_speech_rating: overrides.audio_speech ?? model.ratings?.audio_speech ?? null,
+    audio_music_rating: overrides.audio_music ?? model.ratings?.audio_music ?? null,
+    vision_rating: overrides.vision ?? model.ratings?.vision ?? null,
+    video_rating: overrides.video ?? model.ratings?.video ?? null,
 
     // Limits (nullable)
     requests_per_minute: limits.rpm ?? null,
@@ -1104,8 +1561,8 @@ function transformModelForPinokio(model, db) {
     cost_tier: model.cost_tier || 'paid',
     uses_puter_credits: Boolean(model.uses_puter_credits),
 
-    // Metadata
-    notes: model.notes || details.cost_notes || '',
+    // Metadata - apply notes override
+    notes: overrides.notes ?? model.notes ?? details.cost_notes ?? '',
     limit_source: details.rate_limit_source || limits.source || null,
     limits_last_verified: details.last_updated || null
   };
@@ -1309,20 +1766,82 @@ app.patch('/api/models/:model_id/rating', (req, res) => {
       });
     }
 
-    // TODO: Persist updates to database
-    // For now, this is in-memory only and will not survive restart
-    // To persist: implement a database writer that updates model-company-database-v3-complete.json
-    // This would require finding the model in the registry and updating its model_details section
+    // Update in-memory overrides
+    ratingsOverrides[req.params.model_id] = {
+      ...ratingsOverrides[req.params.model_id],
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    // Persist to disk
+    try {
+      saveRatingsOverrides(ratingsOverrides);
+    } catch (e) {
+      console.error('Failed to persist ratings:', e);
+      return res.status(500).json({
+        error: 'Failed to save ratings to disk',
+        details: e.message
+      });
+    }
 
     res.json({
       success: true,
       model_id: req.params.model_id,
       updates: updates,
-      message: 'Rating updated successfully (in-memory only - not persisted to disk yet)',
+      persisted: true,
+      message: 'Rating updated successfully and persisted to disk',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/rate-limits - Get cached rate limits from recent provider calls
+app.get('/api/rate-limits', (req, res) => {
+  try {
+    res.json({
+      cache: rateLimitCache,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// GET /api/providers/health - Get provider health status
+app.get('/api/providers/health', (req, res) => {
+  try {
+    const db = loadDb();
+    const allProviders = db.metadata.supported_providers;
+
+    const providerHealth = allProviders.map(provider =>
+      getProviderHealthStatus(provider, db)
+    );
+
+    // Generate summary
+    const summary = {
+      total_providers: providerHealth.length,
+      healthy: providerHealth.filter(p => p.status === 'healthy').length,
+      degraded: providerHealth.filter(p => p.status === 'degraded').length,
+      down: providerHealth.filter(p => p.status === 'down').length,
+      unknown: providerHealth.filter(p => p.status === 'unknown').length
+    };
+
+    res.json({
+      providers: providerHealth,
+      summary,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
   }
 });
 

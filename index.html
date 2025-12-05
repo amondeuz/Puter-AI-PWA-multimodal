@@ -776,46 +776,24 @@
     }
   }
 
-  // ---------- Chat model loading from local models.json ----------
+  // ---------- Chat model loading from Pinokio API ----------
 
   // Company lookup database (loaded from external file)
   let MODEL_COMPANY_DATABASE = null;
 
-  // Free models list and toggle state
-  let FREE_MODELS_LIST = null;
+  // Free-only toggle state
   let FREE_ONLY_MODE = false;
 
   // Test/utility models to exclude from model list
   const EXCLUDED_MODELS = ['model-fallback-test-1', 'fake', 'costly', 'abuse'];
 
   /**
-   * Load the free models list from free-models.json.
-   * This provides a curated list of 29 free models (models with :free suffix).
+   * Determine if a model should be treated as free/remote_free.
+   * @param {object} model - Parsed model object from /api/models
+   * @returns {boolean} True if the model is remote free tier
    */
-  async function loadFreeModelsList() {
-    try {
-      const res = await fetch('free-models.json');
-      if (res.ok) {
-        FREE_MODELS_LIST = await res.json();
-        console.log(`Free models list loaded: ${FREE_MODELS_LIST.free_models.length} free models`);
-        return true;
-      }
-    } catch (e) {
-      console.warn('Free models list not available:', e.message);
-    }
-    return false;
-  }
-
-  /**
-   * Check if a model is in the free models list.
-   * @param {string} modelId - The full model ID (e.g. "openrouter:moonshotai/kimi-k2:free")
-   * @returns {boolean} - True if the model is in the free list
-   */
-  function isModelFree(modelId) {
-    if (!FREE_MODELS_LIST || !FREE_MODELS_LIST.free_models) {
-      return false;
-    }
-    return FREE_MODELS_LIST.free_models.includes(modelId);
+  function isModelFree(model) {
+    return model.cost_tier === 'remote_free';
   }
 
   /**
@@ -826,7 +804,7 @@
     if (!FREE_ONLY_MODE) {
       return CHAT_MODEL_DATA;
     }
-    return CHAT_MODEL_DATA.filter(model => isModelFree(model.id));
+    return CHAT_MODEL_DATA.filter(model => isModelFree(model));
   }
 
   /**
@@ -1001,32 +979,39 @@
     // Load company database first
     await loadModelCompanyDatabase();
 
-    // Load free models list
-    await loadFreeModelsList();
-
     try {
-      // Fetch from LOCAL models.json file
-      const res = await fetch('models.json');
+      // Fetch models from the Pinokio API to stay in sync with server metadata
+      const res = await fetch('/api/models?supports_chat=true');
       if (!res.ok) {
-        throw new Error(`Failed to load models.json: ${res.status} ${res.statusText}`);
+        throw new Error(`Failed to load /api/models: ${res.status} ${res.statusText}`);
       }
-      
+
       const json = await res.json();
       const raw = Array.isArray(json.models) ? json.models : [];
-      
-      // Filter out excluded test models and parse
-      const filtered = raw.filter(id => !EXCLUDED_MODELS.includes(id));
-      CHAT_MODEL_DATA = filtered.map(parseModelId);
-      
-      console.log(`Loaded ${CHAT_MODEL_DATA.length} models from models.json`);
+
+      // Filter out excluded test models and parse into legacy-friendly shape
+      const filtered = raw.filter(model => model?.model_id && !EXCLUDED_MODELS.includes(model.model_id));
+      CHAT_MODEL_DATA = filtered.map(model => {
+        const parsed = parseModelId(model.model_id);
+        return {
+          ...parsed,
+          id: model.model_id,
+          name: model.display_name || parsed.name,
+          provider: model.provider_id,
+          cost_tier: model.cost_tier,
+          uses_puter_credits: model.uses_puter_credits
+        };
+      });
+
+      console.log(`Loaded ${CHAT_MODEL_DATA.length} models from /api/models`);
     } catch (e) {
-      console.error('Error loading models.json:', e);
-      alert('Failed to load model list. Please check that models.json is available.');
+      console.error('Error loading models from API:', e);
+      alert('Failed to load model list from API.');
       return;
     }
 
     if (!CHAT_MODEL_DATA.length) {
-      console.error('No chat models available in models.json');
+      console.error('No chat models available from /api/models');
       return;
     }
 

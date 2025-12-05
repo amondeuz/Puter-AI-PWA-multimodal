@@ -2,20 +2,38 @@
   "name": "turbo-console",
   "version": "1.0.0",
   "description": "Turbo Console - Machine-facing API helper for Pinokio routing to multiple AI providers",
-  "main": "server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "dev:once": "tsx src/server.ts",
+    "start:legacy": "node server.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "express": "^4.19.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "express": "^4.19.2"
   },
   "engines": {
     "node": ">=18.0.0"
   },
-  "keywords": ["ai", "api", "router", "pinokio", "llm"],
+  "keywords": [
+    "ai",
+    "api",
+    "router",
+    "pinokio",
+    "llm"
+  ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.10.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
 }

@@ -23,3 +23,6 @@ logs/
 
 # Runtime files
 ratings-overrides.json
+
+# TypeScript build output
+dist/

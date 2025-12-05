@@ -20,3 +20,6 @@ Thumbs.db
 # Logs
 logs/
 *.log
+
+# Runtime files
+ratings-overrides.json

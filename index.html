@@ -291,8 +291,11 @@
         <option value="__all">All companies</option>
       </select>
 
+      <label for="chatModelSearch">Search Model:</label>
+      <input type="text" id="chatModelSearch" placeholder="Type to filter models..." autocomplete="off" style="padding: 4px 8px; margin-bottom: 8px; width: 100%; max-width: 400px;">
+
       <label for="chatModelSelect">Model:</label>
-      <select id="chatModelSelect">
+      <select id="chatModelSelect" size="8" style="max-height: 200px;">
         <!-- Populated from live model list -->
       </select>
 
@@ -1070,8 +1073,20 @@
       }
     }
 
-    function populateModels(scope, company, selectedId) {
-      const models = filteredModels(scope, company).sort((a, b) => a.name.localeCompare(b.name));
+    function populateModels(scope, company, selectedId, searchQuery = '') {
+      let models = filteredModels(scope, company);
+
+      // Apply search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        models = models.filter(m =>
+          m.name.toLowerCase().includes(query) ||
+          m.id.toLowerCase().includes(query) ||
+          (m.company && m.company.toLowerCase().includes(query))
+        );
+      }
+
+      models = models.sort((a, b) => a.name.localeCompare(b.name));
 
       modelSelect.innerHTML = '';
       models.forEach(m => {
@@ -1088,8 +1103,20 @@
       }
     }
 
+    // Add search functionality
+    const searchInput = document.getElementById('chatModelSearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const scope = scopeSelect.value;
+        const company = companySelect.value;
+        const currentValue = modelSelect.value;
+        populateModels(scope, company, currentValue, e.target.value);
+      });
+    }
+
     scopeSelect.onchange = () => {
       const scope = scopeSelect.value;
+      if (searchInput) searchInput.value = ''; // Clear search
       populateCompanies(scope, null);
       populateModels(scope, companySelect.value, null);
     };
@@ -1097,6 +1124,7 @@
     companySelect.onchange = () => {
       const scope = scopeSelect.value;
       const company = companySelect.value;
+      if (searchInput) searchInput.value = ''; // Clear search
       populateModels(scope, company, null);
     };
 

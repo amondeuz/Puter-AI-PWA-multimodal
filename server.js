@@ -113,6 +113,124 @@ function parseRateLimitHeaders(headers, provider) {
 // In-memory rate limit cache (key: "provider:model_id", value: parsed limits)
 const rateLimitCache = {};
 
+// ============================================================================
+// RATINGS PERSISTENCE
+// ============================================================================
+
+const RATINGS_FILE = path.join(__dirname, 'ratings-overrides.json');
+
+function loadRatingsOverrides() {
+  try {
+    if (fs.existsSync(RATINGS_FILE)) {
+      return JSON.parse(fs.readFileSync(RATINGS_FILE, 'utf8'));
+    }
+  } catch (e) {
+    console.warn('Could not load ratings overrides:', e.message);
+  }
+  return {};
+}
+
+function saveRatingsOverrides(overrides) {
+  fs.writeFileSync(RATINGS_FILE, JSON.stringify(overrides, null, 2));
+}
+
+// Load ratings overrides on startup
+let ratingsOverrides = loadRatingsOverrides();
+
+// ============================================================================
+// PROVIDER HEALTH TRACKING
+// ============================================================================
+
+// In-memory provider health tracking (last 100 calls per provider)
+const providerHealthHistory = {};
+const MAX_HISTORY_PER_PROVIDER = 100;
+
+function recordProviderHealth(provider, modelId, success, latencyMs, errorMessage) {
+  if (!providerHealthHistory[provider]) {
+    providerHealthHistory[provider] = [];
+  }
+
+  providerHealthHistory[provider].push({
+    model_id: modelId,
+    success: success,
+    latency_ms: latencyMs,
+    error_message: errorMessage,
+    timestamp: new Date().toISOString()
+  });
+
+  // Keep only last MAX_HISTORY_PER_PROVIDER entries
+  if (providerHealthHistory[provider].length > MAX_HISTORY_PER_PROVIDER) {
+    providerHealthHistory[provider].shift();
+  }
+}
+
+function getProviderHealthStatus(provider, db) {
+  const history = providerHealthHistory[provider] || [];
+
+  if (history.length === 0) {
+    return {
+      provider: provider,
+      status: 'unknown',
+      latency_ms: null,
+      last_checked: null,
+      last_success: null,
+      last_error: null,
+      error_count_last_hour: 0,
+      success_rate_last_hour: null,
+      models_available: buildModelList(db).filter(m => m.provider === provider).length
+    };
+  }
+
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const recentHistory = history.filter(h => new Date(h.timestamp) > oneHourAgo);
+  const lastCall = history[history.length - 1];
+  const lastSuccess = [...history].reverse().find(h => h.success);
+
+  const successCount = recentHistory.filter(h => h.success).length;
+  const totalCount = recentHistory.length;
+  const successRate = totalCount > 0 ? successCount / totalCount : null;
+  const errorCount = recentHistory.filter(h => !h.success).length;
+
+  // Calculate average latency from successful calls
+  const successfulCalls = recentHistory.filter(h => h.success && h.latency_ms);
+  const avgLatency = successfulCalls.length > 0
+    ? Math.round(successfulCalls.reduce((sum, h) => sum + h.latency_ms, 0) / successfulCalls.length)
+    : null;
+
+  // Determine status
+  let status = 'unknown';
+  if (totalCount > 0) {
+    if (successRate >= 0.95 && (avgLatency === null || avgLatency < 2000)) {
+      status = 'healthy';
+    } else if (successRate >= 0.5 && (avgLatency === null || avgLatency < 5000)) {
+      status = 'degraded';
+    } else {
+      status = 'down';
+    }
+
+    // Check if last success was too long ago
+    if (lastSuccess) {
+      const lastSuccessTime = new Date(lastSuccess.timestamp).getTime();
+      const fifteenMinutesAgo = Date.now() - 15 * 60 * 1000;
+      if (lastSuccessTime < fifteenMinutesAgo && totalCount > 5) {
+        status = 'down';
+      }
+    }
+  }
+
+  return {
+    provider: provider,
+    status: status,
+    latency_ms: avgLatency,
+    last_checked: lastCall?.timestamp || null,
+    last_success: lastSuccess?.timestamp || null,
+    last_error: lastCall?.success === false ? lastCall.error_message : null,
+    error_count_last_hour: errorCount,
+    success_rate_last_hour: successRate,
+    models_available: buildModelList(db).filter(m => m.provider === provider).length
+  };
+}
+
 // Check if a model is usable for current Puter account
 async function isModelUsable(model, db) {
   const modelId = model.id;
@@ -845,47 +963,59 @@ async function callDirect(model, input) {
 
 async function callProvider(model, input) {
   const route = model.route || model.provider;
+  const startTime = Date.now();
   let result;
+  let success = true;
+  let errorMessage = null;
 
-  switch (route) {
-    case 'groq':
-      result = await callGroq(model, input);
-      break;
-    case 'mistral':
-      result = await callMistral(model, input);
-      break;
-    case 'openrouter':
-      result = await callOpenRouter(model, input);
-      break;
-    case 'cerebras':
-      result = await callCerebras(model, input);
-      break;
-    case 'cloudflare':
-      result = await callCloudflare(model, input);
-      break;
-    case 'huggingface':
-      result = await callHuggingFace(model, input);
-      break;
-    case 'gemini':
-      result = await callGemini(model, input);
-      break;
-    case 'github':
-      result = await callGitHub(model, input);
-      break;
-    case 'cohere':
-      result = await callCohere(model, input);
-      break;
-    case 'perplexity':
-      result = await callPerplexity(model, input);
-      break;
-    case 'puter':
-      result = await callPuter(model, input);
-      break;
-    case 'direct':
-      result = await callDirect(model, input);
-      break;
-    default:
-      throw new Error(`Provider route "${route}" not implemented`);
+  try {
+    switch (route) {
+      case 'groq':
+        result = await callGroq(model, input);
+        break;
+      case 'mistral':
+        result = await callMistral(model, input);
+        break;
+      case 'openrouter':
+        result = await callOpenRouter(model, input);
+        break;
+      case 'cerebras':
+        result = await callCerebras(model, input);
+        break;
+      case 'cloudflare':
+        result = await callCloudflare(model, input);
+        break;
+      case 'huggingface':
+        result = await callHuggingFace(model, input);
+        break;
+      case 'gemini':
+        result = await callGemini(model, input);
+        break;
+      case 'github':
+        result = await callGitHub(model, input);
+        break;
+      case 'cohere':
+        result = await callCohere(model, input);
+        break;
+      case 'perplexity':
+        result = await callPerplexity(model, input);
+        break;
+      case 'puter':
+        result = await callPuter(model, input);
+        break;
+      case 'direct':
+        result = await callDirect(model, input);
+        break;
+      default:
+        throw new Error(`Provider route "${route}" not implemented`);
+    }
+  } catch (error) {
+    success = false;
+    errorMessage = error.message;
+    throw error; // Re-throw after recording
+  } finally {
+    const latencyMs = Date.now() - startTime;
+    recordProviderHealth(route, model.id, success, latencyMs, errorMessage);
   }
 
   // Parse and cache rate limit headers
@@ -1387,6 +1517,7 @@ app.get('/health', (req, res) => {
 function transformModelForPinokio(model, db) {
   const details = db.model_details?.[model.id] || {};
   const limits = model.limits || details.rate_limits || {};
+  const overrides = ratingsOverrides[model.id] || {};
 
   return {
     model_id: model.id,
@@ -1405,16 +1536,16 @@ function transformModelForPinokio(model, db) {
     supports_vision: Boolean(model.capabilities?.vision),
     supports_video: Boolean(model.capabilities?.video),
 
-    // Ratings (0-5 stars, nullable)
-    chat_rating: model.ratings?.chat ?? null,
-    reasoning_rating: model.ratings?.reasoning ?? null,
-    speed_rating: model.ratings?.speed ?? null,
-    coding_rating: model.ratings?.coding ?? null,
-    images_rating: model.ratings?.images ?? null,
-    audio_speech_rating: model.ratings?.audio_speech ?? null,
-    audio_music_rating: model.ratings?.audio_music ?? null,
-    vision_rating: model.ratings?.vision ?? null,
-    video_rating: model.ratings?.video ?? null,
+    // Ratings (0-5 stars, nullable) - apply overrides
+    chat_rating: overrides.chat ?? model.ratings?.chat ?? null,
+    reasoning_rating: overrides.reasoning ?? model.ratings?.reasoning ?? null,
+    speed_rating: overrides.speed ?? model.ratings?.speed ?? null,
+    coding_rating: overrides.coding ?? model.ratings?.coding ?? null,
+    images_rating: overrides.images ?? model.ratings?.images ?? null,
+    audio_speech_rating: overrides.audio_speech ?? model.ratings?.audio_speech ?? null,
+    audio_music_rating: overrides.audio_music ?? model.ratings?.audio_music ?? null,
+    vision_rating: overrides.vision ?? model.ratings?.vision ?? null,
+    video_rating: overrides.video ?? model.ratings?.video ?? null,
 
     // Limits (nullable)
     requests_per_minute: limits.rpm ?? null,
@@ -1430,8 +1561,8 @@ function transformModelForPinokio(model, db) {
     cost_tier: model.cost_tier || 'paid',
     uses_puter_credits: Boolean(model.uses_puter_credits),
 
-    // Metadata
-    notes: model.notes || details.cost_notes || '',
+    // Metadata - apply notes override
+    notes: overrides.notes ?? model.notes ?? details.cost_notes ?? '',
     limit_source: details.rate_limit_source || limits.source || null,
     limits_last_verified: details.last_updated || null
   };
@@ -1635,16 +1766,30 @@ app.patch('/api/models/:model_id/rating', (req, res) => {
       });
     }
 
-    // TODO: Persist updates to database
-    // For now, this is in-memory only and will not survive restart
-    // To persist: implement a database writer that updates model-company-database-v3-complete.json
-    // This would require finding the model in the registry and updating its model_details section
+    // Update in-memory overrides
+    ratingsOverrides[req.params.model_id] = {
+      ...ratingsOverrides[req.params.model_id],
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    // Persist to disk
+    try {
+      saveRatingsOverrides(ratingsOverrides);
+    } catch (e) {
+      console.error('Failed to persist ratings:', e);
+      return res.status(500).json({
+        error: 'Failed to save ratings to disk',
+        details: e.message
+      });
+    }
 
     res.json({
       success: true,
       model_id: req.params.model_id,
       updates: updates,
-      message: 'Rating updated successfully (in-memory only - not persisted to disk yet)',
+      persisted: true,
+      message: 'Rating updated successfully and persisted to disk',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -1659,6 +1804,39 @@ app.get('/api/rate-limits', (req, res) => {
       cache: rateLimitCache,
       timestamp: new Date().toISOString()
     });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// GET /api/providers/health - Get provider health status
+app.get('/api/providers/health', (req, res) => {
+  try {
+    const db = loadDb();
+    const allProviders = db.metadata.supported_providers;
+
+    const providerHealth = allProviders.map(provider =>
+      getProviderHealthStatus(provider, db)
+    );
+
+    // Generate summary
+    const summary = {
+      total_providers: providerHealth.length,
+      healthy: providerHealth.filter(p => p.status === 'healthy').length,
+      degraded: providerHealth.filter(p => p.status === 'degraded').length,
+      down: providerHealth.filter(p => p.status === 'down').length,
+      unknown: providerHealth.filter(p => p.status === 'unknown').length
+    };
+
+    res.json({
+      providers: providerHealth,
+      summary,
+      timestamp: new Date().toISOString()
+    });
+
   } catch (error) {
     res.status(500).json({
       error: error.message,

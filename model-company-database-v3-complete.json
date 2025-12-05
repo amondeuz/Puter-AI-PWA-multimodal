@@ -13,6 +13,8 @@
       "huggingface",
       "gemini",
       "github",
+      "cohere",
+      "perplexity",
       "puter",
       "openrouter",
       "openai",
@@ -60,7 +62,10 @@
     "mistral-large-2407",
     "mistral-small",
     "phi-3.5-mini-instruct",
-    "phi-3.5-moe-instruct"
+    "phi-3.5-moe-instruct",
+    "command-r-plus-08-2024",
+    "llama-3.1-sonar-small-128k-online",
+    "llama-3.1-sonar-large-128k-online"
   ],
   "free_models_metadata": {
     "sources": [
@@ -393,7 +398,10 @@
         "openrouter:cohere/command-r-plus-08-2024",
         "openrouter:cohere/command-r7b-12-2024"
       ],
-      "total_models": 4
+      "cohere": [
+        "command-r-plus-08-2024"
+      ],
+      "total_models": 5
     },
     "deepcogito": {
       "company_name": "DeepCogito",
@@ -1340,7 +1348,11 @@
         "openrouter:perplexity/sonar-reasoning",
         "openrouter:perplexity/sonar-reasoning-pro"
       ],
-      "total_models": 6
+      "perplexity": [
+        "llama-3.1-sonar-small-128k-online",
+        "llama-3.1-sonar-large-128k-online"
+      ],
+      "total_models": 8
     },
     "pixverse": {
       "company_name": "Pixverse",
